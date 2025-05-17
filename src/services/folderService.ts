@@ -1,14 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-
-export interface Folder {
-  id: string;
-  name: string;
-  user_id: string;
-  parent_folder_id: string | null;
-  snippetCount?: number;
-  subfolders?: Folder[];
-}
+import { Folder } from '../types/Folder';
 
 export async function getFolders(): Promise<Folder[]> {
   const { data, error } = await supabase
@@ -22,7 +14,7 @@ export async function getFolders(): Promise<Folder[]> {
   }
 
   // Get snippet counts for each folder
-  const folderData = await Promise.all(
+  const folderData: Folder[] = await Promise.all(
     data.map(async (folder) => {
       const { count, error: countError } = await supabase
         .from('folder_snippets')

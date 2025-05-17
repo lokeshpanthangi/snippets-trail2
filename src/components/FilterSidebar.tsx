@@ -5,23 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import TagPill from './TagPill';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Folder } from '../types/Folder';
+import { Tag } from '../types/Tag';
 
 type Language = {
   name: string;
   count: number;
-};
-
-type Tag = {
-  name: string;
-  type: 'auto' | 'user';
-  count: number;
-};
-
-type Folder = {
-  id: string;
-  name: string;
-  snippetCount: number;
-  subfolders?: Folder[];
 };
 
 type FilterSidebarProps = {
@@ -29,9 +18,10 @@ type FilterSidebarProps = {
   tags: Tag[];
   folders: Folder[];
   onCreateSnippet: () => void;
+  isLoading?: boolean;
 };
 
-const FilterSidebar = ({ languages, tags, folders, onCreateSnippet }: FilterSidebarProps) => {
+const FilterSidebar = ({ languages, tags, folders, onCreateSnippet, isLoading }: FilterSidebarProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -78,6 +68,23 @@ const FilterSidebar = ({ languages, tags, folders, onCreateSnippet }: FilterSide
       </div>
     );
   };
+
+  if (isLoading) {
+    return (
+      <div className="bg-sidebar h-[calc(100vh-4rem)] w-64 p-4 flex flex-col border-r border-border">
+        <div className="animate-pulse space-y-4">
+          <div className="h-10 bg-muted rounded"></div>
+          <div className="h-10 bg-muted rounded"></div>
+          <div className="h-4 bg-muted rounded w-1/2"></div>
+          <div className="space-y-2">
+            <div className="h-8 bg-muted rounded"></div>
+            <div className="h-8 bg-muted rounded"></div>
+            <div className="h-8 bg-muted rounded"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-sidebar h-[calc(100vh-4rem)] w-64 p-4 flex flex-col border-r border-border">

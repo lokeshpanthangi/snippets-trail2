@@ -14,14 +14,16 @@ import { getSnippets } from '../services/snippetService';
 import { getTags, getLanguageCounts } from '../services/tagService';
 import { getFolders } from '../services/folderService';
 import { supabase } from '@/integrations/supabase/client';
+import type { Folder } from '@/types/Folder';
+import type { Snippet } from '@/types/Snippet';
 
 const Dashboard = () => {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [selectedSnippet, setSelectedSnippet] = useState<any>(undefined);
+  const [selectedSnippet, setSelectedSnippet] = useState<Snippet | undefined>(undefined);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredSnippets, setFilteredSnippets] = useState<any[]>([]);
+  const [filteredSnippets, setFilteredSnippets] = useState<Snippet[]>([]);
   const [userProfile, setUserProfile] = useState<any>(null);
   
   const navigate = useNavigate();
@@ -60,7 +62,7 @@ const Dashboard = () => {
   });
 
   // Fetch folders
-  const { data: folders = [], isLoading: foldersLoading } = useQuery({
+  const { data: folders = [], isLoading: foldersLoading } = useQuery<Folder[]>({
     queryKey: ['folders'],
     queryFn: getFolders,
   });
@@ -70,7 +72,7 @@ const Dashboard = () => {
     setCreateDialogOpen(true);
   };
   
-  const handleEditSnippet = (snippet: any) => {
+  const handleEditSnippet = (snippet: Snippet) => {
     setSelectedSnippet(snippet);
     setCreateDialogOpen(true);
   };
@@ -98,7 +100,7 @@ const Dashboard = () => {
         snippet.title.toLowerCase().includes(query) || 
         (snippet.description?.toLowerCase().includes(query)) ||
         snippet.code.toLowerCase().includes(query) ||
-        snippet.tags.some((tag: any) => tag.name.toLowerCase().includes(query))
+        snippet.tags.some((tag) => tag.name.toLowerCase().includes(query))
       );
     }
     
@@ -219,6 +221,7 @@ const Dashboard = () => {
             ) : filteredSnippets.length > 0 ? (
               <SnippetLibrary 
                 snippets={filteredSnippets}
+                onEditSnippet={handleEditSnippet}
               />
             ) : (
               <EmptyState onCreateSnippet={handleCreateSnippet} />

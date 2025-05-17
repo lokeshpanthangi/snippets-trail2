@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getSnippets } from '../services/snippetService';
 import { getTags, getLanguageCounts } from '../services/tagService';
 import { getFolders } from '../services/folderService';
+import type { Folder } from '@/types/Folder';
 
 const Index = () => {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -32,7 +33,7 @@ const Index = () => {
   });
 
   // Fetch folders
-  const { data: folders = [], isLoading: foldersLoading } = useQuery({
+  const { data: folders = [], isLoading: foldersLoading } = useQuery<Folder[]>({
     queryKey: ['folders'],
     queryFn: getFolders,
   });

@@ -1,8 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { v4 as uuidv4 } from 'uuid';
 import { Snippet } from '../types/Snippet';
-import { Tag } from '../types/Tag';
 
 export async function getSnippets(): Promise<Snippet[]> {
   const { data: snippetsData, error } = await supabase
@@ -83,7 +81,7 @@ export async function getSnippetById(id: string): Promise<Snippet | null> {
   };
 }
 
-export async function createSnippet(snippet: Omit<Snippet, 'id' | 'usageCount' | 'createdAt'>): Promise<Snippet | null> {
+export async function createSnippet(snippet: Omit<Snippet, 'id' | 'created_at' | 'updated_at' | 'usage_count' | 'user_id'>): Promise<Snippet | null> {
   const userId = (await supabase.auth.getUser()).data.user?.id;
   
   if (!userId) {

@@ -9,7 +9,161 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      folder_snippets: {
+        Row: {
+          folder_id: string | null
+          id: string
+          snippet_id: string | null
+        }
+        Insert: {
+          folder_id?: string | null
+          id?: string
+          snippet_id?: string | null
+        }
+        Update: {
+          folder_id?: string | null
+          id?: string
+          snippet_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "folder_snippets_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folder_snippets_snippet_id_fkey"
+            columns: ["snippet_id"]
+            isOneToOne: false
+            referencedRelation: "snippets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      folders: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          parent_folder_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          parent_folder_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          parent_folder_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "folders_parent_folder_id_fkey"
+            columns: ["parent_folder_id"]
+            isOneToOne: false
+            referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      snippet_tags: {
+        Row: {
+          id: string
+          snippet_id: string | null
+          tag_id: string | null
+        }
+        Insert: {
+          id?: string
+          snippet_id?: string | null
+          tag_id?: string | null
+        }
+        Update: {
+          id?: string
+          snippet_id?: string | null
+          tag_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "snippet_tags_snippet_id_fkey"
+            columns: ["snippet_id"]
+            isOneToOne: false
+            referencedRelation: "snippets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "snippet_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      snippets: {
+        Row: {
+          code: string
+          created_at: string | null
+          description: string | null
+          id: string
+          language: string
+          title: string
+          updated_at: string | null
+          usage_count: number | null
+          user_id: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          language: string
+          title: string
+          updated_at?: string | null
+          usage_count?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          language?: string
+          title?: string
+          updated_at?: string | null
+          usage_count?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      tags: {
+        Row: {
+          count: number | null
+          id: string
+          name: string
+          type: string
+        }
+        Insert: {
+          count?: number | null
+          id?: string
+          name: string
+          type: string
+        }
+        Update: {
+          count?: number | null
+          id?: string
+          name?: string
+          type?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

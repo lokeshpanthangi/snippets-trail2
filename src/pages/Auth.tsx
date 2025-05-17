@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { toast } from '@/hooks/use-toast';
 import { Code, Github, Mail, Lock, User } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -26,21 +26,49 @@ const Auth = () => {
     setIsLoading(true);
     
     try {
-      // Simulate authentication process
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      toast({
-        title: isLogin ? "Logged in successfully" : "Account created successfully",
-        description: isLogin ? "Welcome back to SnipStash!" : "Welcome to SnipStash!",
-      });
-      
-      navigate('/dashboard');
-    } catch (error) {
+      if (isLogin) {
+        // Handle login
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+        
+        if (error) throw error;
+        
+        toast({
+          title: "Logged in successfully",
+          description: "Welcome back to SnipStash!",
+        });
+        
+        navigate('/dashboard');
+      } else {
+        // Handle signup
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              username,
+            }
+          }
+        });
+        
+        if (error) throw error;
+        
+        toast({
+          title: "Account created successfully",
+          description: "Welcome to SnipStash! Please check your email for verification.",
+        });
+        
+        navigate('/dashboard');
+      }
+    } catch (error: any) {
       toast({
         title: "Authentication failed",
-        description: "Please check your credentials and try again",
+        description: error?.message || "Please check your credentials and try again",
         variant: "destructive",
       });
+      console.error("Auth error:", error);
     } finally {
       setIsLoading(false);
     }

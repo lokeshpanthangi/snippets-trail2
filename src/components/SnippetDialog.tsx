@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -31,7 +30,9 @@ const detectCodePatterns = (code: string): { pattern: string, type: string, name
   const lowerCode = code.toLowerCase();
   
   // API calls
-  if (lowerCode.includes('fetch(') || lowerCode.includes('axios.') || lowerCode.includes('xmlhttprequest')) {
+  if (lowerCode.includes('fetch(') || lowerCode.includes('axios.') || lowerCode.includes('xmlhttprequest') || 
+      lowerCode.includes('http.get') || lowerCode.includes('http.post') || lowerCode.includes('api.') ||
+      lowerCode.includes('request(') || lowerCode.includes('ajax(')) {
     patterns.push({ 
       pattern: 'API calls', 
       type: 'api', 
@@ -41,7 +42,9 @@ const detectCodePatterns = (code: string): { pattern: string, type: string, name
   }
   
   // Loops
-  if (lowerCode.includes('for (') || lowerCode.includes('while (') || lowerCode.includes('forEach') || lowerCode.includes('for ') || lowerCode.includes('while ')) {
+  if (lowerCode.includes('for (') || lowerCode.includes('while (') || lowerCode.includes('foreach') || 
+      lowerCode.includes('for ') || lowerCode.includes('while ') || lowerCode.includes('do {') ||
+      lowerCode.includes('for...of') || lowerCode.includes('for...in')) {
     patterns.push({ 
       pattern: 'Loops', 
       type: 'loop', 
@@ -51,7 +54,9 @@ const detectCodePatterns = (code: string): { pattern: string, type: string, name
   }
   
   // Error handling
-  if (lowerCode.includes('try {') || lowerCode.includes('catch (') || lowerCode.includes('try:') || lowerCode.includes('except:') || lowerCode.includes('throw ')) {
+  if (lowerCode.includes('try {') || lowerCode.includes('catch (') || lowerCode.includes('try:') || 
+      lowerCode.includes('except:') || lowerCode.includes('throw ') || lowerCode.includes('error') ||
+      lowerCode.includes('finally') || lowerCode.includes('raise ')) {
     patterns.push({ 
       pattern: 'Error handling', 
       type: 'error', 
@@ -61,7 +66,9 @@ const detectCodePatterns = (code: string): { pattern: string, type: string, name
   }
   
   // Debugging
-  if (lowerCode.includes('console.log') || lowerCode.includes('print(') || lowerCode.includes('debug(')) {
+  if (lowerCode.includes('console.log') || lowerCode.includes('print(') || lowerCode.includes('debug(') ||
+      lowerCode.includes('console.error') || lowerCode.includes('console.warn') || lowerCode.includes('console.info') ||
+      lowerCode.includes('debugger') || lowerCode.includes('logger.') || lowerCode.includes('log(')) {
     patterns.push({ 
       pattern: 'Debugging', 
       type: 'debug', 
@@ -72,12 +79,74 @@ const detectCodePatterns = (code: string): { pattern: string, type: string, name
   
   // Array methods
   if (lowerCode.includes('.map(') || lowerCode.includes('.filter(') || lowerCode.includes('.reduce(') || 
-      lowerCode.includes('.forEach(') || lowerCode.includes('.find(')) {
+      lowerCode.includes('.foreach(') || lowerCode.includes('.find(') || lowerCode.includes('.some(') ||
+      lowerCode.includes('.every(') || lowerCode.includes('.flatmap(') || lowerCode.includes('.sort(') ||
+      lowerCode.includes('.reverse(') || lowerCode.includes('.slice(') || lowerCode.includes('.splice(')) {
     patterns.push({ 
       pattern: 'Array operations', 
       type: 'array', 
       name: 'array-methods', 
       icon: <List className="h-3 w-3" /> 
+    });
+  }
+
+  // Conditional logic
+  if (lowerCode.includes('if (') || lowerCode.includes('else if') || lowerCode.includes('else {') ||
+      lowerCode.includes('switch (') || lowerCode.includes('case ') || lowerCode.includes('?:') ||
+      lowerCode.includes('ternary') || lowerCode.includes('if:') || lowerCode.includes('elif')) {
+    patterns.push({
+      pattern: 'Conditional logic',
+      type: 'condition',
+      name: 'conditional',
+      icon: <ArrowRight className="h-3 w-3" />
+    });
+  }
+
+  // Async operations
+  if (lowerCode.includes('async') || lowerCode.includes('await') || lowerCode.includes('promise') ||
+      lowerCode.includes('.then(') || lowerCode.includes('.catch(') || lowerCode.includes('settimeout') ||
+      lowerCode.includes('setinterval') || lowerCode.includes('async/await')) {
+    patterns.push({
+      pattern: 'Async operations',
+      type: 'async',
+      name: 'async',
+      icon: <ArrowRight className="h-3 w-3" />
+    });
+  }
+
+  // DOM manipulation
+  if (lowerCode.includes('document.') || lowerCode.includes('queryselector') || lowerCode.includes('getelement') ||
+      lowerCode.includes('addeventlistener') || lowerCode.includes('innerhtml') || lowerCode.includes('appendchild') ||
+      lowerCode.includes('createelement') || lowerCode.includes('classlist')) {
+    patterns.push({
+      pattern: 'DOM manipulation',
+      type: 'dom',
+      name: 'dom',
+      icon: <List className="h-3 w-3" />
+    });
+  }
+
+  // Regular expressions
+  if (lowerCode.includes('regex') || lowerCode.includes('regexp') || lowerCode.includes('/[a-z]/') ||
+      lowerCode.includes('match(') || lowerCode.includes('replace(') || lowerCode.includes('test(') ||
+      lowerCode.includes('exec(') || lowerCode.includes('search(')) {
+    patterns.push({
+      pattern: 'Regular expressions',
+      type: 'regex',
+      name: 'regex',
+      icon: <List className="h-3 w-3" />
+    });
+  }
+
+  // Data structures
+  if (lowerCode.includes('map(') || lowerCode.includes('set(') || lowerCode.includes('weakmap') ||
+      lowerCode.includes('weakset') || lowerCode.includes('object.entries') || lowerCode.includes('object.keys') ||
+      lowerCode.includes('object.values') || lowerCode.includes('new map') || lowerCode.includes('new set')) {
+    patterns.push({
+      pattern: 'Data structures',
+      type: 'data-structure',
+      name: 'data-structures',
+      icon: <List className="h-3 w-3" />
     });
   }
   
@@ -97,6 +166,21 @@ const generateAutoTags = (code: string, language: string): { name: string, type:
   // Add language tag
   if (language) {
     tags.push({ name: language.toLowerCase(), type: 'auto' });
+  }
+
+  // Add framework-specific tags based on imports/requires
+  const lowerCode = code.toLowerCase();
+  if (lowerCode.includes('react') || lowerCode.includes('jsx') || lowerCode.includes('tsx')) {
+    tags.push({ name: 'react', type: 'auto' });
+  }
+  if (lowerCode.includes('vue')) {
+    tags.push({ name: 'vue', type: 'auto' });
+  }
+  if (lowerCode.includes('angular')) {
+    tags.push({ name: 'angular', type: 'auto' });
+  }
+  if (lowerCode.includes('express') || lowerCode.includes('koa') || lowerCode.includes('next')) {
+    tags.push({ name: 'node', type: 'auto' });
   }
   
   return tags;
@@ -261,30 +345,30 @@ const SnippetDialog = ({ open, onOpenChange, snippet }: SnippetDialogProps) => {
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[800px] bg-snippet-bg text-foreground">
+      <DialogContent className="sm:max-w-[700px] bg-snippet-bg text-foreground">
         <DialogHeader>
-          <DialogTitle className="font-jetbrains text-xl">
+          <DialogTitle className="font-jetbrains text-lg">
             {snippet ? 'Edit Snippet' : 'Create New Snippet'}
           </DialogTitle>
         </DialogHeader>
         
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 gap-4">
+        <div className="grid gap-3 py-3">
+          <div className="grid grid-cols-4 gap-3">
             <div className="col-span-3">
-              <Label htmlFor="title" className="font-jetbrains">Title</Label>
+              <Label htmlFor="title" className="font-jetbrains text-sm">Title</Label>
               <Input
                 id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="bg-snippet-code border-snippet-border"
+                className="bg-snippet-code border-snippet-border h-8"
                 placeholder="Descriptive name for your snippet"
               />
             </div>
             
             <div>
-              <Label htmlFor="language" className="font-jetbrains">Language</Label>
+              <Label htmlFor="language" className="font-jetbrains text-sm">Language</Label>
               <Select value={language} onValueChange={setLanguage}>
-                <SelectTrigger className="bg-snippet-code border-snippet-border">
+                <SelectTrigger className="bg-snippet-code border-snippet-border h-8">
                   <SelectValue placeholder="Select Language" />
                 </SelectTrigger>
                 <SelectContent className="bg-snippet-bg border-snippet-border">
@@ -299,37 +383,37 @@ const SnippetDialog = ({ open, onOpenChange, snippet }: SnippetDialogProps) => {
           </div>
           
           <div>
-            <Label htmlFor="description" className="font-jetbrains">Description (optional)</Label>
+            <Label htmlFor="description" className="font-jetbrains text-sm">Description (optional)</Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="bg-snippet-code border-snippet-border resize-none h-20"
+              className="bg-snippet-code border-snippet-border resize-none h-16"
               placeholder="What does this code snippet do? When would you use it?"
             />
           </div>
           
           <div>
-            <Label htmlFor="code" className="font-jetbrains">Code</Label>
+            <Label htmlFor="code" className="font-jetbrains text-sm">Code</Label>
             <div className="mt-1 relative">
               <Textarea
                 id="code"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
-                className="bg-snippet-code border-snippet-border resize-none h-64 font-jetbrains"
+                className="bg-snippet-code border-snippet-border resize-none h-48 font-jetbrains"
                 placeholder="Paste or type your code here"
               />
               
               {/* Pattern detection visualization */}
               {detectedPatterns.length > 0 && (
-                <div className="mt-2 p-3 bg-primary/10 border border-primary/20 rounded-md animate-fade-in">
-                  <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-primary" />
+                <div className="mt-2 p-2 bg-primary/10 border border-primary/20 rounded-md animate-fade-in">
+                  <h4 className="text-xs font-medium mb-1.5 flex items-center gap-1.5">
+                    <Sparkles className="h-3 w-3 text-primary" />
                     Auto-detected patterns
                   </h4>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1.5">
                     {detectedPatterns.map((pattern, idx) => (
-                      <div key={idx} className="text-xs flex items-center gap-1 bg-primary/20 text-primary-foreground px-3 py-1 rounded-full">
+                      <div key={idx} className="text-xs flex items-center gap-1 bg-primary/20 text-primary-foreground px-2 py-0.5 rounded-full">
                         {pattern.icon}
                         {pattern.pattern}
                       </div>
@@ -337,32 +421,25 @@ const SnippetDialog = ({ open, onOpenChange, snippet }: SnippetDialogProps) => {
                   </div>
                 </div>
               )}
-              
-              <div className="mt-4 border border-snippet-border rounded-md overflow-hidden">
-                <div className="p-2 bg-snippet-code/50 border-b border-snippet-border text-sm font-jetbrains">
-                  Preview
-                </div>
-                <CodeBlock code={code} language={language.toLowerCase()} showLineNumbers={true} />
-              </div>
             </div>
           </div>
           
           <div>
-            <div className="flex justify-between items-center mb-2">
-              <Label className="font-jetbrains">Tags</Label>
+            <div className="flex justify-between items-center mb-1.5">
+              <Label className="font-jetbrains text-sm">Tags</Label>
               <Button 
                 variant="outline" 
                 size="sm" 
                 onClick={handleGenerateAutoTags} 
                 disabled={isGeneratingTags || !code}
-                className="text-xs h-7 gap-1"
+                className="text-xs h-6 gap-1"
               >
                 <Sparkles className="h-3 w-3" />
                 {isGeneratingTags ? 'Generating...' : 'Auto-detect Tags'}
               </Button>
             </div>
             
-            <div className="flex flex-wrap gap-2 mb-3">
+            <div className="flex flex-wrap gap-1.5 mb-2">
               {autoTags.map((tag, idx) => (
                 <TagPill key={`auto-${idx}`} name={tag.name} type="auto" />
               ))}
@@ -385,7 +462,7 @@ const SnippetDialog = ({ open, onOpenChange, snippet }: SnippetDialogProps) => {
                 value={newTag}
                 onChange={(e) => setNewTag(e.target.value)}
                 placeholder="Add a custom tag..."
-                className="bg-snippet-code border-snippet-border"
+                className="bg-snippet-code border-snippet-border h-8"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
@@ -397,19 +474,19 @@ const SnippetDialog = ({ open, onOpenChange, snippet }: SnippetDialogProps) => {
                 variant="outline" 
                 onClick={handleAddTag}
                 disabled={!newTag}
-                className="gap-1"
+                className="gap-1 h-8"
               >
-                <Plus className="h-4 w-4" /> Add
+                <Plus className="h-3 w-3" /> Add
               </Button>
             </div>
           </div>
         </div>
         
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>Cancel</Button>
+        <DialogFooter className="mt-2">
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting} className="h-8">Cancel</Button>
           <Button 
             onClick={handleSave} 
-            className="bg-primary text-primary-foreground hover:bg-primary/90" 
+            className="bg-primary text-primary-foreground hover:bg-primary/90 h-8" 
             disabled={isSubmitting}
           >
             {isSubmitting ? 'Saving...' : snippet ? 'Update' : 'Save'} Snippet

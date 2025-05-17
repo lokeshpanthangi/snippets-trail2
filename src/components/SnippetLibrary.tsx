@@ -15,12 +15,13 @@ import { useQuery } from '@tanstack/react-query';
 type SnippetLibraryProps = {
   snippets?: Snippet[];
   onEditSnippet?: (snippet: Snippet) => void;
+  sidebarCollapsed?: boolean;
 };
 
 type ViewMode = 'grid' | 'list' | 'table';
 type SortOption = 'recent' | 'usage' | 'alphabetical' | 'language';
 
-const SnippetLibrary = ({ snippets: propSnippets, onEditSnippet }: SnippetLibraryProps) => {
+const SnippetLibrary = ({ snippets: propSnippets, onEditSnippet, sidebarCollapsed = false }: SnippetLibraryProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedSnippet, setSelectedSnippet] = useState<Snippet | undefined>(undefined);
   const [filteredSnippets, setFilteredSnippets] = useState<Snippet[]>([]);
@@ -146,6 +147,17 @@ const SnippetLibrary = ({ snippets: propSnippets, onEditSnippet }: SnippetLibrar
   const handleViewModeChange = (mode: ViewMode) => {
     setViewMode(mode);
   };
+
+  // Determine grid columns based on sidebarCollapsed
+  const gridCols = viewMode === 'grid'
+    ? sidebarCollapsed
+      ? 'grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4'
+      : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4'
+    : viewMode === 'list'
+      ? 'flex flex-col gap-3'
+      : viewMode === 'table'
+        ? 'overflow-x-auto'
+        : '';
 
   if (snippetsLoading || tagsLoading) {
     return (
@@ -350,11 +362,7 @@ const SnippetLibrary = ({ snippets: propSnippets, onEditSnippet }: SnippetLibrar
       </div>
       
       {/* Snippet grid */}
-      <div className={`
-        ${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' : ''}
-        ${viewMode === 'list' ? 'flex flex-col gap-3' : ''}
-        ${viewMode === 'table' ? 'overflow-x-auto' : ''}
-      `}>
+      <div className={gridCols}>
         {viewMode === 'table' ? (
           <table className="w-full text-sm">
             <thead>

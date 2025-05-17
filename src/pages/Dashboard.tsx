@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SnippetLibrary from '../components/SnippetLibrary';
@@ -222,6 +221,7 @@ const Dashboard = () => {
               <SnippetLibrary 
                 snippets={filteredSnippets}
                 onEditSnippet={handleEditSnippet}
+                sidebarCollapsed={sidebarCollapsed}
               />
             ) : (
               <EmptyState onCreateSnippet={handleCreateSnippet} />

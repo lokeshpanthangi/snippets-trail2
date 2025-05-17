@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Fira+Code:wght@400;500;600&display=swap');
 
 @tailwind base;
@@ -168,5 +167,38 @@
   /* Tag connection animation */
   .tag-connection {
     @apply absolute w-[1px] bg-primary/50 animate-tag-connect;
+  }
+
+  /* Beautiful custom scrollbar for code containers */
+  .code-scrollbar, .group:hover .code-scrollbar, .group:focus-within .code-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #7c3aed #23272f;
+  }
+
+  .code-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    background: transparent;
+  }
+
+  .code-scrollbar::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #7c3aed 40%, #818cf8 100%);
+    border-radius: 8px;
+    min-height: 40px;
+    border: 2px solid #23272f;
+    transition: background 0.3s;
+  }
+
+  .code-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+  }
+
+  .code-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* Hide scrollbar unless hovering or scrolling */
+  .code-scrollbar {
+    scrollbar-gutter: stable;
+    transition: background 0.3s;
   }
 }

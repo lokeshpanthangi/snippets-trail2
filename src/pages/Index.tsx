@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import FilterSidebar from '../components/FilterSidebar';
@@ -53,10 +52,9 @@ const Index = () => {
   const isLoading = snippetsLoading || languagesLoading || tagsLoading || foldersLoading;
   
   return (
-    <div className="min-h-screen bg-background text-foreground grid-bg">
+    <div className="min-h-screen w-full bg-background text-foreground">
       <Header onCreateSnippet={handleCreateSnippet} />
-      
-      <div className="flex">
+      <div className="flex w-full min-h-screen">
         <FilterSidebar 
           languages={languages}
           tags={tags}
@@ -64,8 +62,7 @@ const Index = () => {
           onCreateSnippet={handleCreateSnippet}
           isLoading={isLoading}
         />
-        
-        <div className="flex-1">
+        <div className="flex-1 w-full">
           {isLoading ? (
             <div className="flex items-center justify-center h-64">
               <div className="animate-pulse text-primary">Loading snippets...</div>
@@ -80,7 +77,6 @@ const Index = () => {
           )}
         </div>
       </div>
-      
       <SnippetDialog
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}

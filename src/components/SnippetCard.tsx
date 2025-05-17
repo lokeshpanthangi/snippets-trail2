@@ -1,12 +1,13 @@
-
 import React, { useState } from 'react';
-import { ClipboardCopy, Check } from 'lucide-react';
+import { Check, Copy, Pencil } from 'lucide-react';
 import LanguageBadge from './LanguageBadge';
 import TagPill from './TagPill';
-import CodeBlock from './CodeBlock';
 import { toast } from '@/hooks/use-toast';
 import { Snippet } from '../types/Snippet';
 import { incrementUsageCount } from '../services/snippetService';
+import { CodeBlock, CodeBlockCode, CodeBlockGroup } from '@/components/ui/code-block';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 type SnippetCardProps = {
   snippet: Snippet;
@@ -14,6 +15,7 @@ type SnippetCardProps = {
   viewMode?: 'grid' | 'list';
   isRecent?: boolean;
   isMostUsed?: boolean;
+  onEditSnippet?: (snippet: Snippet) => void;
 };
 
 const SnippetCard = ({ 
@@ -21,29 +23,25 @@ const SnippetCard = ({
   onClick, 
   viewMode = 'grid',
   isRecent = false,
-  isMostUsed = false 
+  isMostUsed = false,
+  onEditSnippet
 }: SnippetCardProps) => {
   const [copied, setCopied] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [copyCount, setCopyCount] = useState(snippet.usage_count || 0);
 
-  const handleCopyClick = async (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleCopyClick = async (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     try {
       await navigator.clipboard.writeText(snippet.code);
       setCopied(true);
-      
-      // Increment usage count in the background
-      incrementUsageCount(snippet.id).catch(err => {
-        console.error('Failed to increment usage count:', err);
-      });
-      
+      setCopyCount((prev) => prev + 1);
+      incrementUsageCount(snippet.id).catch(() => {});
       toast({
         title: "Copied to clipboard",
         description: `${snippet.title} has been copied to your clipboard.`,
         duration: 2000,
       });
-      
-      // Reset the copied state after animation completes
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       toast({
@@ -51,135 +49,96 @@ const SnippetCard = ({
         description: "There was an error copying to clipboard.",
         variant: "destructive",
       });
-      console.error('Failed to copy: ', err);
     }
   };
 
-  const getCardClasses = () => {
-    let classes = "snippet-card group cursor-pointer";
-    
-    if (isRecent) {
-      classes += " border-l-secondary";
-    } else if (isMostUsed) {
-      classes += " border-l-accent";
-    } else {
-      classes += " border-l-primary";
-    }
-    
-    if (viewMode === 'list') {
-      classes += " border-l-4";
-    }
-    
-    return classes;
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setDialogOpen(false);
+    if (onEditSnippet) onEditSnippet(snippet);
   };
 
-  if (viewMode === 'list') {
-    return (
-      <div 
-        className={getCardClasses()}
-        onClick={() => onClick(snippet.id)}
-        onMouseEnter={() => setIsHovering(true)}
-        onMouseLeave={() => setIsHovering(false)}
+  return (
+    <>
+      <div
+        className="group relative rounded-2xl overflow-hidden shadow-xl border border-border bg-gradient-to-br from-background/80 to-card/90 hover:shadow-2xl hover:border-primary/60 transition-all duration-300 cursor-pointer max-w-3xl mx-auto min-h-[500px] h-[500px] w-full transform hover:scale-105 select-none"
+        onClick={() => setDialogOpen(true)}
+        style={{ minHeight: 500, height: 500 }}
       >
-        <div className="p-4 flex flex-col md:flex-row gap-3 md:items-center">
-          <div className="flex flex-col flex-grow gap-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-4 right-4 z-10 h-8 w-8"
+          onClick={handleCopyClick}
+        >
+          {copied ? (
+            <Check className="h-4 w-4 text-green-500" />
+          ) : (
+            <Copy className="h-4 w-4" />
+          )}
+        </Button>
+        <CodeBlock className="rounded-2xl h-full flex flex-col">
+          <CodeBlockGroup className="border-border border-b px-4 py-2 bg-background/80 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <h3 className="font-jetbrains font-bold text-lg">{snippet.title}</h3>
+              <span className="font-jetbrains font-bold text-lg text-foreground truncate max-w-[60vw]">
+                {snippet.title}
+              </span>
               <LanguageBadge language={snippet.language} />
-              {isRecent && (
-                <span className="text-xs bg-secondary/20 text-secondary-foreground px-2 py-0.5 rounded-full animate-pulse">New</span>
-              )}
-              {isMostUsed && (
-                <span className="text-xs bg-accent/20 text-accent-foreground px-2 py-0.5 rounded-full">Popular</span>
-              )}
             </div>
-            
-            {snippet.description && (
-              <p className="text-sm text-muted-foreground line-clamp-1">{snippet.description}</p>
-            )}
-            
-            <div className="flex flex-nowrap gap-1.5 mt-1 overflow-x-auto scrollbar-none pb-1 max-w-md">
+          </CodeBlockGroup>
+          <div className="flex-1 overflow-hidden">
+            <CodeBlockCode code={snippet.code} language={snippet.language} theme="vitesse-dark" />
+          </div>
+          <div className="flex flex-wrap gap-2 px-4 pb-3 pt-2">
+            {snippet.tags.map((tag, idx) => (
+              <TagPill key={idx} name={tag.name} type={tag.type} />
+            ))}
+          </div>
+          <div className="absolute bottom-3 right-4 text-xs text-muted-foreground bg-background/80 px-2 py-1 rounded shadow font-mono">
+            {copyCount} copied
+          </div>
+        </CodeBlock>
+      </div>
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-2xl w-full p-0 overflow-hidden">
+          <div className="flex flex-col h-[80vh]">
+            <div className="flex items-center justify-between px-6 pt-6 pb-2">
+              <div className="flex items-center gap-2">
+                <span className="font-jetbrains font-bold text-xl text-foreground truncate max-w-[40vw]">
+                  {snippet.title}
+                </span>
+                <LanguageBadge language={snippet.language} />
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={handleCopyClick}
+              >
+                {copied ? (
+                  <Check className="h-4 w-4 text-green-500" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+            <div className="flex-1 overflow-auto px-6 pb-2 pt-2">
+              <CodeBlockCode code={snippet.code} language={snippet.language} theme="vitesse-dark" />
+            </div>
+            <div className="flex flex-wrap gap-2 px-6 pb-4 pt-2">
               {snippet.tags.map((tag, idx) => (
                 <TagPill key={idx} name={tag.name} type={tag.type} />
               ))}
             </div>
-          </div>
-          
-          <div className="flex items-center gap-3 ml-auto">
-            <div className="text-xs text-muted-foreground flex flex-col items-end">
-              <span>{snippet.usage_count} uses</span>
-              <span>{new Date(snippet.created_at).toLocaleDateString()}</span>
+            <div className="flex justify-end px-6 pb-6">
+              <Button variant="outline" onClick={handleEdit} className="gap-2">
+                <Pencil className="h-4 w-4" /> Edit
+              </Button>
             </div>
-            
-            <button 
-              onClick={handleCopyClick}
-              className={`p-2 rounded-md transition-all duration-200 ${copied ? 'bg-secondary/30 text-secondary-foreground' : 'bg-muted/50 hover:bg-primary/20'} ${isHovering ? 'opacity-100' : 'opacity-70'}`}
-            >
-              {copied ? <Check className="h-5 w-5 animate-copy-success" /> : <ClipboardCopy className="h-5 w-5" />}
-            </button>
           </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Default grid view
-  return (
-    <div 
-      className={`snippet-card group cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover ${isHovering ? 'shadow-neon-purple' : ''}`}
-      onClick={() => onClick(snippet.id)}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
-    >
-      <div className={`p-4 flex flex-col gap-3 border-l-4 ${isRecent ? 'border-l-secondary' : isMostUsed ? 'border-l-accent' : 'border-l-primary'}`}>
-        <div className="flex justify-between items-start">
-          <h3 className="font-jetbrains font-bold text-lg line-clamp-1">{snippet.title}</h3>
-          <div className="flex items-center gap-1">
-            {isRecent && (
-              <span className="text-xs bg-secondary/20 text-secondary-foreground px-2 py-0.5 rounded-full animate-pulse">New</span>
-            )}
-            {isMostUsed && (
-              <span className="text-xs bg-accent/20 text-accent-foreground px-2 py-0.5 rounded-full">Popular</span>
-            )}
-            <LanguageBadge language={snippet.language} />
-          </div>
-        </div>
-        
-        {snippet.description && (
-          <p className="text-sm text-muted-foreground line-clamp-2">{snippet.description}</p>
-        )}
-        
-        <div className="relative">
-          <CodeBlock code={snippet.code} language={snippet.language} preview={true} />
-          
-          <button 
-            onClick={handleCopyClick}
-            className={`copy-button ${copied ? 'bg-secondary/30 text-secondary-foreground' : ''} ${copied ? 'animate-copy-success' : ''}`}
-            aria-label="Copy code"
-          >
-            {copied ? <Check className="w-4 h-4" /> : <ClipboardCopy className="w-4 h-4" />}
-          </button>
-        </div>
-        
-        <div className="flex flex-nowrap gap-1.5 overflow-x-auto scrollbar-none pb-1">
-          {snippet.tags.map((tag, idx) => (
-            <TagPill key={idx} name={tag.name} type={tag.type} />
-          ))}
-          {snippet.tags.length > 6 && (
-            <span className="text-xs py-1 px-2 bg-muted rounded-full text-muted-foreground">
-              +{snippet.tags.length - 6}
-            </span>
-          )}
-        </div>
-        
-        <div className="flex justify-between items-center text-xs text-muted-foreground mt-2">
-          <span className={`${isHovering && snippet.usage_count > 0 ? 'text-primary' : ''} transition-colors duration-200`}>
-            Used {snippet.usage_count} times
-          </span>
-          <span>{new Date(snippet.created_at).toLocaleDateString()}</span>
-        </div>
-      </div>
-    </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 

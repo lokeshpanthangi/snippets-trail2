@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Check, Copy, Pencil } from 'lucide-react';
 import LanguageBadge from './LanguageBadge';
@@ -61,7 +62,7 @@ const SnippetCard = ({
   return (
     <>
       <div
-        className="group relative rounded-2xl overflow-hidden shadow-xl border border-border bg-gradient-to-br from-background/80 to-card/90 hover:shadow-2xl hover:border-primary/60 transition-all duration-300 cursor-pointer max-w-3xl mx-auto min-h-[500px] h-[500px] w-full transform hover:scale-105 select-none"
+        className="group relative rounded-2xl overflow-hidden shadow-xl border border-border bg-gradient-to-br from-background to-card/90 hover:shadow-2xl hover:border-primary/60 transition-all duration-300 cursor-pointer max-w-3xl mx-auto min-h-[500px] h-[500px] w-full transform hover:scale-105 select-none"
         onClick={() => setDialogOpen(true)}
         style={{ minHeight: 500, height: 500 }}
       >
@@ -78,7 +79,7 @@ const SnippetCard = ({
           )}
         </Button>
         <CodeBlock className="rounded-2xl h-full flex flex-col">
-          <CodeBlockGroup className="border-border border-b px-4 py-2 bg-background/80 flex items-center justify-between">
+          <CodeBlockGroup className="border-border border-b px-4 py-2 bg-muted/30 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="font-jetbrains font-bold text-lg text-foreground truncate max-w-[60vw]">
                 {snippet.title}

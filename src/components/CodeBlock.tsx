@@ -12,9 +12,9 @@ type CodeBlockProps = {
   detectPatterns?: boolean;
 };
 
-// Enhanced syntax highlighting function with more detailed token handling
+// Enhanced syntax highlighting function with more detailed token handling for dark theme
 const highlightCode = (code: string, language: string) => {
-  // Language specific highlighting rules
+  // Language specific highlighting rules optimized for dark theme
   if (language === 'javascript' || language === 'typescript') {
     return code
       // Keywords

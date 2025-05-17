@@ -63,10 +63,10 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// SnipStash custom colors
+				// Updated dark theme colors for code snippets
 				snippet: {
-					bg: '#1E1E1E',
-					code: '#0D1117',
+					bg: '#121212',
+					code: '#0A0A0A',
 					border: '#2A2A2A',
 				},
 				lang: {

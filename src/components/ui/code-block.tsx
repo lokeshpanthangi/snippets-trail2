@@ -2,7 +2,8 @@
 
 import { cn } from "@/lib/utils"
 import React, { useEffect, useState } from "react"
-import { codeToHtml } from "shiki"
+import Prism from "prismjs"
+import "prismjs/themes/prism-tomorrow.css"
 
 export type CodeBlockProps = {
   children?: React.ReactNode
@@ -13,7 +14,7 @@ function CodeBlock({ children, className, ...props }: CodeBlockProps) {
   return (
     <div
       className={cn(
-        "not-prose flex w-full flex-col overflow-clip border",
+        "not-prose flex w-full flex-col overflow-hidden border",
         "border-border bg-card text-card-foreground rounded-xl",
         className
       )}
@@ -27,38 +28,32 @@ function CodeBlock({ children, className, ...props }: CodeBlockProps) {
 export type CodeBlockCodeProps = {
   code: string
   language?: string
-  theme?: string
   className?: string
 } & React.HTMLProps<HTMLDivElement>
 
 function CodeBlockCode({
   code,
   language = "tsx",
-  theme = "github-dark",
   className,
   ...props
 }: CodeBlockCodeProps) {
   const [highlightedHtml, setHighlightedHtml] = useState<string | null>(null)
 
   useEffect(() => {
-    async function highlight() {
-      if (!code) {
-        setHighlightedHtml("<pre><code></code></pre>")
-        return
-      }
-
-      const html = await codeToHtml(code, { lang: language, theme })
-      setHighlightedHtml(html)
+    if (!code) {
+      setHighlightedHtml("<pre><code></code></pre>")
+      return
     }
-    highlight()
-  }, [code, language, theme])
+    const grammar = Prism.languages[language] || Prism.languages.javascript
+    const html = Prism.highlight(code, grammar, language)
+    setHighlightedHtml(`<pre class="language-${language}"><code class="language-${language}">${html}</code></pre>`)
+  }, [code, language])
 
   const classNames = cn(
-    "w-full overflow-x-auto text-[13px] [&>pre]:px-4 [&>pre]:py-4",
+    "w-full whitespace-pre-wrap break-words overflow-x-hidden font-jetbrains text-sm [&>pre]:px-4 [&>pre]:py-4",
     className
   )
 
-  // SSR fallback: render plain code if not hydrated yet
   return highlightedHtml ? (
     <div
       className={classNames}

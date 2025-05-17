@@ -75,7 +75,69 @@
   }
 
   .code-editor {
-    @apply bg-snippet-code p-4 rounded-md font-jetbrains text-sm leading-relaxed overflow-x-auto;
+    @apply bg-snippet-code p-4 rounded-md font-jetbrains text-sm leading-relaxed;
+  }
+
+  .code-editor pre {
+    @apply overflow-x-auto;
+  }
+
+  .code-editor code {
+    @apply block whitespace-pre-wrap break-words;
+  }
+
+  /* Syntax highlighting colors */
+  .code-editor .token.comment,
+  .code-editor .token.prolog,
+  .code-editor .token.doctype,
+  .code-editor .token.cdata {
+    @apply text-muted-foreground;
+  }
+
+  .code-editor .token.punctuation {
+    @apply text-foreground/70;
+  }
+
+  .code-editor .token.property,
+  .code-editor .token.tag,
+  .code-editor .token.boolean,
+  .code-editor .token.number,
+  .code-editor .token.constant,
+  .code-editor .token.symbol {
+    @apply text-blue-400;
+  }
+
+  .code-editor .token.selector,
+  .code-editor .token.attr-name,
+  .code-editor .token.string,
+  .code-editor .token.char,
+  .code-editor .token.builtin {
+    @apply text-green-400;
+  }
+
+  .code-editor .token.operator,
+  .code-editor .token.entity,
+  .code-editor .token.url,
+  .code-editor .language-css .token.string,
+  .code-editor .style .token.string {
+    @apply text-yellow-400;
+  }
+
+  .code-editor .token.atrule,
+  .code-editor .token.attr-value,
+  .code-editor .token.keyword {
+    @apply text-purple-400;
+  }
+
+  .code-editor .token.function,
+  .code-editor .token.class-name {
+    @apply text-orange-400;
+  }
+
+  .code-editor .token.regex,
+  .code-editor .token.important,
+  .code-editor .token.variable {
+    @apply text-red-400;
   }
 
   .language-badge {
@@ -200,5 +262,40 @@
   .code-scrollbar {
     scrollbar-gutter: stable;
     transition: background 0.3s;
+  }
+
+  .shiki {
+    background: transparent !important;
+    color: #d4d4d4 !important;
+    font-family: 'JetBrains Mono', 'Fira Code', 'monospace';
+    font-size: 13px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .shiki span[style] {
+    color: unset !important;
+  }
+  .shiki .line {
+    display: block;
+    width: 100%;
+  }
+  .shiki .token.comment { color: #6a9955; }
+  .shiki .token.keyword { color: #c586c0; }
+  .shiki .token.string { color: #ce9178; }
+  .shiki .token.number { color: #b5cea8; }
+  .shiki .token.function { color: #dcdcaa; }
+  .shiki .token.type { color: #4ec9b0; }
+  .shiki .token.class { color: #4ec9b0; }
+  .shiki .token.constant { color: #569cd6; }
+  .shiki .token.tag { color: #569cd6; }
+  .shiki .token.attr-name { color: #9cdcfe; }
+  .shiki .token.attr-value { color: #ce9178; }
+  .shiki .token.punctuation { color: #d4d4d4; }
+  .shiki .token.operator { color: #d4d4d4; }
+
+  .code-editor, .code-editor pre, .code-editor code {
+    background-color: var(--card) !important;
+    box-shadow: none !important;
   }
 }

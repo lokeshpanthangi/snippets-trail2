@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Check, Copy } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
@@ -234,7 +233,7 @@ const CodeBlock = ({
         </button>
       )}
       <pre className={`overflow-x-auto code-scrollbar ${showLineNumbers && !preview ? 'line-numbered' : ''}`}>
-        <code className="font-jetbrains text-sm transition-opacity duration-300" 
+        <code className="font-jetbrains text-sm transition-opacity duration-300 block whitespace-pre-wrap break-words" 
               dangerouslySetInnerHTML={{ __html: highlightedCode || displayCode }} />
       </pre>
     </div>

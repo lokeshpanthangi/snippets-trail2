@@ -421,6 +421,7 @@ const SnippetLibrary = ({ snippets: propSnippets, onEditSnippet, sidebarCollapse
               snippet={snippet} 
               onClick={handleSnippetClick}
               viewMode={viewMode}
+              onEditSnippet={onEditSnippet}
             />
           ))
         )}

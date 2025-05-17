@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Bug, ArrowRight, ArrowUp, Shield, List } from 'lucide-react';
+import { ArrowRight, ArrowUp, Shield, List, Bug } from 'lucide-react';
 
 type TagPillProps = {
   name: string;
@@ -32,10 +32,9 @@ const getTagIcon = (name: string) => {
 const TagPill = ({ name, type }: TagPillProps) => {
   const pillClass = type === 'auto' ? 'tag-pill-auto' : 'tag-pill-user';
   const icon = getTagIcon(name);
-  const isNew = Math.random() > 0.8; // Simulate some tags being newly added (for demo purposes)
   
   return (
-    <span className={`tag-pill ${pillClass} ${isNew ? 'animate-tag-pulse' : ''}`}>
+    <span className={`tag-pill ${pillClass}`}>
       {icon}
       {name}
       {type === 'auto' && <span className="ml-1 opacity-50 text-[0.65rem]">•AI</span>}

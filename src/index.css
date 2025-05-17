@@ -97,4 +97,39 @@
   .typing-animation {
     @apply overflow-hidden whitespace-nowrap border-r-4 border-primary inline-block animate-typing animate-blink-caret;
   }
+  
+  /* New styles for enhanced features */
+  .line-numbered {
+    @apply relative pl-8;
+    counter-reset: line;
+  }
+  
+  .code-line-number {
+    @apply absolute left-0 text-muted-foreground text-xs opacity-70 w-6 text-right pr-2 select-none;
+  }
+  
+  .pattern-highlight {
+    @apply bg-primary/10 rounded;
+  }
+  
+  .pattern-highlight-loop {
+    @apply bg-purple-500/10;
+  }
+  
+  .pattern-highlight-api {
+    @apply bg-blue-500/10;
+  }
+  
+  .pattern-highlight-debug {
+    @apply bg-yellow-500/10;
+  }
+  
+  .pattern-highlight-error {
+    @apply bg-red-500/10;
+  }
+  
+  .pattern-highlight-array {
+    @apply bg-green-500/10;
+  }
 }
+

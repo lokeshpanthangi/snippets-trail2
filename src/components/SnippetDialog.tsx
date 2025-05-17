@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,8 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import CodeBlock from './CodeBlock';
 import TagPill from './TagPill';
-import { X, Plus, Sparkles } from 'lucide-react';
+import { X, Plus, Sparkles, Bug, ArrowRight, ArrowUp, Shield, List } from 'lucide-react';
 import { Snippet } from './SnippetCard';
+import { toast } from '@/hooks/use-toast';
 
 type SnippetDialogProps = {
   open: boolean;
@@ -22,36 +23,75 @@ const programmingLanguages = [
   'PHP', 'Ruby', 'Go', 'Swift', 'Rust', 'HTML', 'CSS'
 ];
 
-// Simulate tag suggestions based on code content
-const generateAutoTags = (code: string, language: string): { name: string, type: 'auto' }[] => {
-  const tags: { name: string, type: 'auto' }[] = [];
+// Pattern detection for auto-tagging
+const detectCodePatterns = (code: string): { pattern: string, type: string, name: string, icon: React.ReactNode }[] => {
+  const patterns: { pattern: string, type: string, name: string, icon: React.ReactNode }[] = [];
   const lowerCode = code.toLowerCase();
   
-  // Simple rule-based tag detection
-  if (lowerCode.includes('fetch(') || lowerCode.includes('axios.')) {
-    tags.push({ name: 'api', type: 'auto' });
+  // API calls
+  if (lowerCode.includes('fetch(') || lowerCode.includes('axios.') || lowerCode.includes('xmlhttprequest')) {
+    patterns.push({ 
+      pattern: 'API calls', 
+      type: 'api', 
+      name: 'api', 
+      icon: <ArrowRight className="h-3 w-3" /> 
+    });
   }
   
-  if (lowerCode.includes('for (') || lowerCode.includes('while (') || lowerCode.includes('forEach')) {
-    tags.push({ name: 'loop', type: 'auto' });
+  // Loops
+  if (lowerCode.includes('for (') || lowerCode.includes('while (') || lowerCode.includes('forEach') || lowerCode.includes('for ') || lowerCode.includes('while ')) {
+    patterns.push({ 
+      pattern: 'Loops', 
+      type: 'loop', 
+      name: 'loop', 
+      icon: <ArrowUp className="h-3 w-3" /> 
+    });
   }
   
-  if (lowerCode.includes('try {') || lowerCode.includes('catch (')) {
-    tags.push({ name: 'error-handling', type: 'auto' });
+  // Error handling
+  if (lowerCode.includes('try {') || lowerCode.includes('catch (') || lowerCode.includes('try:') || lowerCode.includes('except:') || lowerCode.includes('throw ')) {
+    patterns.push({ 
+      pattern: 'Error handling', 
+      type: 'error', 
+      name: 'error-handling', 
+      icon: <Shield className="h-3 w-3" /> 
+    });
   }
   
-  if (lowerCode.includes('console.log') || lowerCode.includes('print(')) {
-    tags.push({ name: 'debugging', type: 'auto' });
+  // Debugging
+  if (lowerCode.includes('console.log') || lowerCode.includes('print(') || lowerCode.includes('debug(')) {
+    patterns.push({ 
+      pattern: 'Debugging', 
+      type: 'debug', 
+      name: 'debugging', 
+      icon: <Bug className="h-3 w-3" /> 
+    });
   }
   
-  if (lowerCode.includes('.map(') || lowerCode.includes('.filter(') || lowerCode.includes('.reduce(')) {
-    tags.push({ name: 'array-methods', type: 'auto' });
+  // Array methods
+  if (lowerCode.includes('.map(') || lowerCode.includes('.filter(') || lowerCode.includes('.reduce(') || 
+      lowerCode.includes('.forEach(') || lowerCode.includes('.find(')) {
+    patterns.push({ 
+      pattern: 'Array operations', 
+      type: 'array', 
+      name: 'array-methods', 
+      icon: <List className="h-3 w-3" /> 
+    });
   }
   
-  if (lowerCode.includes('function') || lowerCode.includes('def ')) {
-    tags.push({ name: 'function', type: 'auto' });
-  }
+  return patterns;
+};
 
+// Generate auto tags based on code content and language
+const generateAutoTags = (code: string, language: string): { name: string, type: 'auto' }[] => {
+  const tags: { name: string, type: 'auto' }[] = [];
+  const detectedPatterns = detectCodePatterns(code);
+  
+  // Add tags based on detected patterns
+  detectedPatterns.forEach(pattern => {
+    tags.push({ name: pattern.name, type: 'auto' });
+  });
+  
   // Add language tag
   if (language) {
     tags.push({ name: language.toLowerCase(), type: 'auto' });
@@ -68,11 +108,24 @@ const SnippetDialog = ({ open, onOpenChange, snippet }: SnippetDialogProps) => {
   const [userTags, setUserTags] = useState<string[]>(
     snippet?.tags.filter(t => t.type === 'user').map(t => t.name) || []
   );
+  const [autoTags, setAutoTags] = useState<{ name: string, type: 'auto' }[]>(
+    snippet?.tags.filter(t => t.type === 'auto').map(t => ({ name: t.name, type: 'auto' })) || []
+  );
   const [newTag, setNewTag] = useState('');
   const [isGeneratingTags, setIsGeneratingTags] = useState(false);
+  const [detectedPatterns, setDetectedPatterns] = useState<{ pattern: string, type: string, name: string, icon: React.ReactNode }[]>([]);
   
-  // Auto-generated tags based on code content
-  const autoTags = generateAutoTags(code, language);
+  // Update auto-generated tags when code or language changes
+  useEffect(() => {
+    const patterns = detectCodePatterns(code);
+    setDetectedPatterns(patterns);
+    
+    // Don't immediately regenerate tags if we're editing an existing snippet
+    if (!snippet) {
+      const newAutoTags = generateAutoTags(code, language);
+      setAutoTags(newAutoTags);
+    }
+  }, [code, language]);
   
   const handleAddTag = () => {
     if (newTag && !userTags.includes(newTag)) {
@@ -86,15 +139,48 @@ const SnippetDialog = ({ open, onOpenChange, snippet }: SnippetDialogProps) => {
   };
   
   const handleGenerateAutoTags = () => {
-    // Simulate AI generating tags
+    // Simulate AI generating tags with a delay for UX
     setIsGeneratingTags(true);
     setTimeout(() => {
+      const newAutoTags = generateAutoTags(code, language);
+      setAutoTags(newAutoTags);
       setIsGeneratingTags(false);
-    }, 1500);
+      
+      toast({
+        title: "Tags Generated",
+        description: `${newAutoTags.length} tags were automatically detected in your code.`,
+      });
+    }, 1000);
   };
   
   const handleSave = () => {
-    // Process form data and save the snippet
+    // Here we would normally save the snippet to a database
+    // For now, just close the dialog and show a success message
+    
+    if (!title.trim()) {
+      toast({
+        title: "Title required",
+        description: "Please provide a title for your snippet.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!code.trim()) {
+      toast({
+        title: "Code required",
+        description: "Your snippet needs some code!",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    toast({
+      title: snippet ? "Snippet Updated" : "Snippet Created",
+      description: `Your snippet "${title}" has been saved.`,
+      variant: "default",
+    });
+    
     onOpenChange(false);
   };
   
@@ -116,6 +202,7 @@ const SnippetDialog = ({ open, onOpenChange, snippet }: SnippetDialogProps) => {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="bg-snippet-code border-snippet-border"
+                placeholder="Descriptive name for your snippet"
               />
             </div>
             
@@ -143,6 +230,7 @@ const SnippetDialog = ({ open, onOpenChange, snippet }: SnippetDialogProps) => {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="bg-snippet-code border-snippet-border resize-none h-20"
+              placeholder="What does this code snippet do? When would you use it?"
             />
           </div>
           
@@ -154,13 +242,32 @@ const SnippetDialog = ({ open, onOpenChange, snippet }: SnippetDialogProps) => {
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 className="bg-snippet-code border-snippet-border resize-none h-64 font-jetbrains"
+                placeholder="Paste or type your code here"
               />
+              
+              {/* Pattern detection visualization */}
+              {detectedPatterns.length > 0 && (
+                <div className="mt-2 p-3 bg-primary/10 border border-primary/20 rounded-md animate-fade-in">
+                  <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    Auto-detected patterns
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {detectedPatterns.map((pattern, idx) => (
+                      <div key={idx} className="text-xs flex items-center gap-1 bg-primary/20 text-primary-foreground px-3 py-1 rounded-full">
+                        {pattern.icon}
+                        {pattern.pattern}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
               
               <div className="mt-4 border border-snippet-border rounded-md overflow-hidden">
                 <div className="p-2 bg-snippet-code/50 border-b border-snippet-border text-sm font-jetbrains">
                   Preview
                 </div>
-                <CodeBlock code={code} language={language.toLowerCase()} />
+                <CodeBlock code={code} language={language.toLowerCase()} showLineNumbers={true} />
               </div>
             </div>
           </div>
@@ -180,7 +287,7 @@ const SnippetDialog = ({ open, onOpenChange, snippet }: SnippetDialogProps) => {
               </Button>
             </div>
             
-            <div className="flex flex-wrap gap-2 mb-2">
+            <div className="flex flex-wrap gap-2 mb-3">
               {autoTags.map((tag, idx) => (
                 <TagPill key={`auto-${idx}`} name={tag.name} type="auto" />
               ))}
@@ -225,7 +332,9 @@ const SnippetDialog = ({ open, onOpenChange, snippet }: SnippetDialogProps) => {
         
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={handleSave} className="bg-primary text-primary-foreground hover:bg-primary/90">Save Snippet</Button>
+          <Button onClick={handleSave} className="bg-primary text-primary-foreground hover:bg-primary/90">
+            {snippet ? 'Update' : 'Save'} Snippet
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

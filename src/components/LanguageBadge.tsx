@@ -18,6 +18,20 @@ const languageColors: Record<string, string> = {
   php: 'bg-lang-php text-white',
   swift: 'bg-lang-swift text-white',
   rust: 'bg-lang-rust text-white',
+  c: 'bg-gray-700 text-white',
+  cpp: 'bg-blue-800 text-white',
+  dart: 'bg-blue-500 text-white',
+  kotlin: 'bg-purple-600 text-white',
+  scala: 'bg-red-700 text-white',
+  haskell: 'bg-gray-600 text-white',
+  shell: 'bg-gray-800 text-green-300',
+  bash: 'bg-gray-800 text-green-300',
+  powershell: 'bg-blue-900 text-blue-200',
+  sql: 'bg-orange-700 text-white',
+  markdown: 'bg-gray-700 text-white',
+  json: 'bg-gray-600 text-yellow-300',
+  xml: 'bg-gray-700 text-orange-300',
+  yaml: 'bg-purple-800 text-white',
   default: 'bg-muted text-muted-foreground',
 };
 
@@ -34,6 +48,20 @@ const languageDisplay: Record<string, string> = {
   php: 'PHP',
   swift: 'SWIFT',
   rust: 'RUST',
+  c: 'C',
+  cpp: 'C++',
+  dart: 'DART',
+  kotlin: 'KT',
+  scala: 'SCALA',
+  haskell: 'HS',
+  shell: 'SH',
+  bash: 'BASH',
+  powershell: 'PS',
+  sql: 'SQL',
+  markdown: 'MD',
+  json: 'JSON',
+  xml: 'XML',
+  yaml: 'YAML',
 };
 
 const LanguageBadge = ({ language }: LanguageProps) => {
@@ -42,7 +70,8 @@ const LanguageBadge = ({ language }: LanguageProps) => {
   const displayText = languageDisplay[normalizedLang] || language.toUpperCase();
 
   return (
-    <span className={`language-badge ${colorClass}`}>
+    <span className={`language-badge ${colorClass} flex items-center gap-1`}>
+      <span className="w-2 h-2 rounded-full bg-white/30"></span>
       {displayText}
     </span>
   );

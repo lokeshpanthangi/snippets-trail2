@@ -34,7 +34,7 @@ const TagPill = ({ name, type }: TagPillProps) => {
   const icon = getTagIcon(name);
   
   return (
-    <span className={`tag-pill ${pillClass}`}>
+    <span className={`tag-pill ${pillClass} transition-all duration-200 hover:-translate-y-0.5`}>
       {icon}
       {name}
       {type === 'auto' && <span className="ml-1 opacity-50 text-[0.65rem]">•AI</span>}

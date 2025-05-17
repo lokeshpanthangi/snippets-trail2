@@ -6,18 +6,18 @@ type LanguageProps = {
 };
 
 const languageColors: Record<string, string> = {
-  javascript: 'bg-lang-js text-black',
-  python: 'bg-lang-py text-white',
-  typescript: 'bg-lang-ts text-white',
-  html: 'bg-lang-html text-white',
-  css: 'bg-lang-css text-white',
-  ruby: 'bg-lang-ruby text-white',
-  go: 'bg-lang-go text-white',
-  java: 'bg-lang-java text-white',
-  csharp: 'bg-lang-csharp text-white',
-  php: 'bg-lang-php text-white',
-  swift: 'bg-lang-swift text-white',
-  rust: 'bg-lang-rust text-white',
+  javascript: 'bg-yellow-400 text-black',
+  python: 'bg-blue-600 text-white',
+  typescript: 'bg-blue-500 text-white',
+  html: 'bg-orange-500 text-white',
+  css: 'bg-blue-400 text-white',
+  ruby: 'bg-red-600 text-white',
+  go: 'bg-blue-300 text-white',
+  java: 'bg-red-400 text-white',
+  csharp: 'bg-green-600 text-white',
+  php: 'bg-indigo-500 text-white',
+  swift: 'bg-orange-600 text-white',
+  rust: 'bg-orange-700 text-white',
   c: 'bg-gray-700 text-white',
   cpp: 'bg-blue-800 text-white',
   dart: 'bg-blue-500 text-white',
@@ -70,8 +70,8 @@ const LanguageBadge = ({ language }: LanguageProps) => {
   const displayText = languageDisplay[normalizedLang] || language.toUpperCase();
 
   return (
-    <span className={`language-badge ${colorClass} flex items-center gap-1`}>
-      <span className="w-2 h-2 rounded-full bg-white/30"></span>
+    <span className={`language-badge ${colorClass} flex items-center gap-1.5 shadow-sm`}>
+      <span className="w-2 h-2 rounded-full bg-white/40"></span>
       {displayText}
     </span>
   );

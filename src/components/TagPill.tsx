@@ -1,0 +1,46 @@
+
+import React from 'react';
+import { Bug, ArrowRight, ArrowUp, Shield, List } from 'lucide-react';
+
+type TagPillProps = {
+  name: string;
+  type: 'auto' | 'user';
+};
+
+const getTagIcon = (name: string) => {
+  const nameLower = name.toLowerCase();
+  
+  if (nameLower.includes('debug') || nameLower.includes('log')) {
+    return <Bug className="w-3 h-3" />;
+  }
+  if (nameLower.includes('api') || nameLower.includes('fetch') || nameLower.includes('axios')) {
+    return <ArrowRight className="w-3 h-3" />;
+  }
+  if (nameLower.includes('loop') || nameLower.includes('for') || nameLower.includes('while')) {
+    return <ArrowUp className="w-3 h-3" />; 
+  }
+  if (nameLower.includes('error') || nameLower.includes('try') || nameLower.includes('catch')) {
+    return <Shield className="w-3 h-3" />;
+  }
+  if (nameLower.includes('array') || nameLower.includes('map') || nameLower.includes('filter')) {
+    return <List className="w-3 h-3" />;
+  }
+  
+  return null;
+};
+
+const TagPill = ({ name, type }: TagPillProps) => {
+  const pillClass = type === 'auto' ? 'tag-pill-auto' : 'tag-pill-user';
+  const icon = getTagIcon(name);
+  const isNew = Math.random() > 0.8; // Simulate some tags being newly added (for demo purposes)
+  
+  return (
+    <span className={`tag-pill ${pillClass} ${isNew ? 'animate-tag-pulse' : ''}`}>
+      {icon}
+      {name}
+      {type === 'auto' && <span className="ml-1 opacity-50 text-[0.65rem]">•AI</span>}
+    </span>
+  );
+};
+
+export default TagPill;

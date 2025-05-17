@@ -12,12 +12,15 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Code } from 'lucide-react';
 
 type HeaderProps = {
   onCreateSnippet: () => void;
+  searchQuery?: string;
+  onSearchChange?: React.Dispatch<React.SetStateAction<string>>;
 };
 
-const Header = ({ onCreateSnippet }: HeaderProps) => {
+const Header = ({ onCreateSnippet, searchQuery = "", onSearchChange }: HeaderProps) => {
   return (
     <header className="bg-sidebar border-b border-sidebar-border sticky top-0 z-10">
       <div className="container flex justify-between items-center h-16 px-4">
@@ -42,6 +45,8 @@ const Header = ({ onCreateSnippet }: HeaderProps) => {
             <Input 
               placeholder="Search snippets..." 
               className="pl-9 w-64 bg-sidebar-accent border-sidebar-border"
+              value={searchQuery}
+              onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
             />
           </div>
           
@@ -94,8 +99,5 @@ const Header = ({ onCreateSnippet }: HeaderProps) => {
     </header>
   );
 };
-
-// Need to import Code component from lucide-react
-import { Code } from 'lucide-react';
 
 export default Header;

@@ -9,8 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import CodeBlock from './CodeBlock';
 import TagPill from './TagPill';
 import { X, Plus, Sparkles, Bug, ArrowRight, ArrowUp, Shield, List } from 'lucide-react';
-import { Snippet } from './SnippetCard';
+import { Snippet } from '../types/Snippet';
 import { toast } from '@/hooks/use-toast';
+import { createSnippet, updateSnippet } from '../services/snippetService';
+import { useQueryClient } from '@tanstack/react-query';
 
 type SnippetDialogProps = {
   open: boolean;
@@ -114,6 +116,28 @@ const SnippetDialog = ({ open, onOpenChange, snippet }: SnippetDialogProps) => {
   const [newTag, setNewTag] = useState('');
   const [isGeneratingTags, setIsGeneratingTags] = useState(false);
   const [detectedPatterns, setDetectedPatterns] = useState<{ pattern: string, type: string, name: string, icon: React.ReactNode }[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const queryClient = useQueryClient();
+  
+  // Update form when snippet changes
+  useEffect(() => {
+    if (snippet) {
+      setTitle(snippet.title);
+      setDescription(snippet.description || '');
+      setLanguage(snippet.language);
+      setCode(snippet.code);
+      setUserTags(snippet.tags.filter(t => t.type === 'user').map(t => t.name));
+      setAutoTags(snippet.tags.filter(t => t.type === 'auto').map(t => ({ name: t.name, type: 'auto' })));
+    } else {
+      setTitle('');
+      setDescription('');
+      setLanguage('JavaScript');
+      setCode('');
+      setUserTags([]);
+      setAutoTags([]);
+    }
+  }, [snippet, open]);
   
   // Update auto-generated tags when code or language changes
   useEffect(() => {
@@ -139,7 +163,7 @@ const SnippetDialog = ({ open, onOpenChange, snippet }: SnippetDialogProps) => {
   };
   
   const handleGenerateAutoTags = () => {
-    // Simulate AI generating tags with a delay for UX
+    // Generate tags based on code content
     setIsGeneratingTags(true);
     setTimeout(() => {
       const newAutoTags = generateAutoTags(code, language);
@@ -153,10 +177,7 @@ const SnippetDialog = ({ open, onOpenChange, snippet }: SnippetDialogProps) => {
     }, 1000);
   };
   
-  const handleSave = () => {
-    // Here we would normally save the snippet to a database
-    // For now, just close the dialog and show a success message
-    
+  const handleSave = async () => {
     if (!title.trim()) {
       toast({
         title: "Title required",
@@ -174,14 +195,68 @@ const SnippetDialog = ({ open, onOpenChange, snippet }: SnippetDialogProps) => {
       });
       return;
     }
-    
-    toast({
-      title: snippet ? "Snippet Updated" : "Snippet Created",
-      description: `Your snippet "${title}" has been saved.`,
-      variant: "default",
-    });
-    
-    onOpenChange(false);
+
+    setIsSubmitting(true);
+
+    // Combine user and auto tags
+    const allTags = [
+      ...userTags.map(name => ({ name, type: 'user' as const })),
+      ...autoTags
+    ];
+
+    try {
+      if (snippet) {
+        // Update existing snippet
+        await updateSnippet(snippet.id, {
+          title,
+          description,
+          language,
+          code,
+          tags: allTags
+        });
+        
+        toast({
+          title: "Snippet Updated",
+          description: `Your snippet "${title}" has been updated.`,
+          variant: "default",
+        });
+      } else {
+        // Create new snippet
+        const newSnippet = await createSnippet({
+          title,
+          description,
+          language,
+          code,
+          tags: allTags
+        });
+        
+        if (newSnippet) {
+          toast({
+            title: "Snippet Created",
+            description: `Your snippet "${title}" has been saved.`,
+            variant: "default",
+          });
+        } else {
+          throw new Error("Failed to create snippet");
+        }
+      }
+      
+      // Refresh the snippets data
+      queryClient.invalidateQueries({ queryKey: ['snippets'] });
+      queryClient.invalidateQueries({ queryKey: ['tags'] });
+      
+      // Close the dialog
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error saving snippet:', error);
+      toast({
+        title: "Error",
+        description: "There was a problem saving your snippet. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
   return (
@@ -331,9 +406,13 @@ const SnippetDialog = ({ open, onOpenChange, snippet }: SnippetDialogProps) => {
         </div>
         
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={handleSave} className="bg-primary text-primary-foreground hover:bg-primary/90">
-            {snippet ? 'Update' : 'Save'} Snippet
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>Cancel</Button>
+          <Button 
+            onClick={handleSave} 
+            className="bg-primary text-primary-foreground hover:bg-primary/90" 
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Saving...' : snippet ? 'Update' : 'Save'} Snippet
           </Button>
         </DialogFooter>
       </DialogContent>

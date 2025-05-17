@@ -5,20 +5,8 @@ import LanguageBadge from './LanguageBadge';
 import TagPill from './TagPill';
 import CodeBlock from './CodeBlock';
 import { toast } from '@/hooks/use-toast';
-
-export type Snippet = {
-  id: string;
-  title: string;
-  description?: string;
-  language: string;
-  code: string;
-  tags: {
-    name: string;
-    type: 'auto' | 'user';
-  }[];
-  usageCount: number;
-  createdAt: string;
-};
+import { Snippet } from '../types/Snippet';
+import { incrementUsageCount } from '../services/snippetService';
 
 type SnippetCardProps = {
   snippet: Snippet;
@@ -38,27 +26,33 @@ const SnippetCard = ({
   const [copied, setCopied] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
 
-  const handleCopyClick = (e: React.MouseEvent) => {
+  const handleCopyClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigator.clipboard.writeText(snippet.code)
-      .then(() => {
-        setCopied(true);
-        toast({
-          title: "Copied to clipboard",
-          description: `${snippet.title} has been copied to your clipboard.`,
-          duration: 2000,
-        });
-        // Reset the copied state after animation completes
-        setTimeout(() => setCopied(false), 2000);
-      })
-      .catch(err => {
-        toast({
-          title: "Failed to copy",
-          description: "There was an error copying to clipboard.",
-          variant: "destructive",
-        });
-        console.error('Failed to copy: ', err);
+    try {
+      await navigator.clipboard.writeText(snippet.code);
+      setCopied(true);
+      
+      // Increment usage count in the background
+      incrementUsageCount(snippet.id).catch(err => {
+        console.error('Failed to increment usage count:', err);
       });
+      
+      toast({
+        title: "Copied to clipboard",
+        description: `${snippet.title} has been copied to your clipboard.`,
+        duration: 2000,
+      });
+      
+      // Reset the copied state after animation completes
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      toast({
+        title: "Failed to copy",
+        description: "There was an error copying to clipboard.",
+        variant: "destructive",
+      });
+      console.error('Failed to copy: ', err);
+    }
   };
 
   const getCardClasses = () => {
@@ -113,8 +107,8 @@ const SnippetCard = ({
           
           <div className="flex items-center gap-3 ml-auto">
             <div className="text-xs text-muted-foreground flex flex-col items-end">
-              <span>{snippet.usageCount} uses</span>
-              <span>{new Date(snippet.createdAt).toLocaleDateString()}</span>
+              <span>{snippet.usage_count} uses</span>
+              <span>{new Date(snippet.created_at).toLocaleDateString()}</span>
             </div>
             
             <button 
@@ -179,10 +173,10 @@ const SnippetCard = ({
         </div>
         
         <div className="flex justify-between items-center text-xs text-muted-foreground mt-2">
-          <span className={`${isHovering && snippet.usageCount > 0 ? 'text-primary' : ''} transition-colors duration-200`}>
-            Used {snippet.usageCount} times
+          <span className={`${isHovering && snippet.usage_count > 0 ? 'text-primary' : ''} transition-colors duration-200`}>
+            Used {snippet.usage_count} times
           </span>
-          <span>{new Date(snippet.createdAt).toLocaleDateString()}</span>
+          <span>{new Date(snippet.created_at).toLocaleDateString()}</span>
         </div>
       </div>
     </div>

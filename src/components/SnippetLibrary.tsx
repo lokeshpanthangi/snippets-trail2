@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import SnippetCard from './SnippetCard';
-import { Snippet } from './SnippetCard';
+import { Snippet } from '../types/Snippet';
 import SnippetDialog from './SnippetDialog';
 import { Button } from './ui/button';
 import { Search, X, SlidersHorizontal } from 'lucide-react';
@@ -9,18 +9,21 @@ import { Input } from './ui/input';
 import TagPill from './TagPill';
 import LanguageBadge from './LanguageBadge';
 import { Badge } from './ui/badge';
+import { getSnippets } from '../services/snippetService';
+import { getTags } from '../services/tagService';
+import { useQuery } from '@tanstack/react-query';
 
 type SnippetLibraryProps = {
-  snippets: Snippet[];
+  snippets?: Snippet[];
 };
 
 type ViewMode = 'grid' | 'list' | 'table';
 type SortOption = 'recent' | 'usage' | 'alphabetical' | 'language';
 
-const SnippetLibrary = ({ snippets }: SnippetLibraryProps) => {
+const SnippetLibrary = ({ snippets: propSnippets }: SnippetLibraryProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedSnippet, setSelectedSnippet] = useState<Snippet | undefined>(undefined);
-  const [filteredSnippets, setFilteredSnippets] = useState<Snippet[]>(snippets);
+  const [filteredSnippets, setFilteredSnippets] = useState<Snippet[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -28,14 +31,29 @@ const SnippetLibrary = ({ snippets }: SnippetLibraryProps) => {
   const [sortOption, setSortOption] = useState<SortOption>('recent');
   const [showFilters, setShowFilters] = useState(false);
 
+  // Fetch snippets
+  const { data: fetchedSnippets = [], isLoading: snippetsLoading } = useQuery({
+    queryKey: ['snippets'],
+    queryFn: getSnippets,
+  });
+
+  // Fetch tags
+  const { data: fetchedTags = [], isLoading: tagsLoading } = useQuery({
+    queryKey: ['tags'],
+    queryFn: getTags,
+  });
+
+  // Use prop snippets if provided, otherwise use fetched snippets
+  const snippetsData = propSnippets || fetchedSnippets;
+
   // Extract unique languages from snippets
-  const availableLanguages = [...new Set(snippets.map(s => s.language))];
+  const availableLanguages = [...new Set(snippetsData.map(s => s.language))];
   
   // Extract unique tags from snippets
-  const availableTags = [...new Set(snippets.flatMap(s => s.tags.map(t => t.name)))];
+  const availableTags = fetchedTags.map(tag => tag.name);
   
   const handleSnippetClick = (id: string) => {
-    const snippet = snippets.find(s => s.id === id);
+    const snippet = snippetsData.find(s => s.id === id);
     if (snippet) {
       setSelectedSnippet(snippet);
       setDialogOpen(true);
@@ -66,7 +84,7 @@ const SnippetLibrary = ({ snippets }: SnippetLibraryProps) => {
 
   // Apply filters and sorting whenever the filter criteria change
   useEffect(() => {
-    let result = [...snippets];
+    let result = [...snippetsData];
     
     // Apply search query filter
     if (searchQuery) {
@@ -98,16 +116,16 @@ const SnippetLibrary = ({ snippets }: SnippetLibraryProps) => {
     result = sortSnippets(result, sortOption);
     
     setFilteredSnippets(result);
-  }, [snippets, searchQuery, selectedLanguages, selectedTags, sortOption]);
+  }, [snippetsData, searchQuery, selectedLanguages, selectedTags, sortOption]);
 
   const sortSnippets = (snippetsToSort: Snippet[], option: SortOption): Snippet[] => {
     const sorted = [...snippetsToSort];
     
     switch(option) {
       case 'recent':
-        return sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        return sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       case 'usage':
-        return sorted.sort((a, b) => b.usageCount - a.usageCount);
+        return sorted.sort((a, b) => b.usage_count - a.usage_count);
       case 'alphabetical':
         return sorted.sort((a, b) => a.title.localeCompare(b.title));
       case 'language':
@@ -124,6 +142,16 @@ const SnippetLibrary = ({ snippets }: SnippetLibraryProps) => {
   const handleViewModeChange = (mode: ViewMode) => {
     setViewMode(mode);
   };
+
+  if (snippetsLoading || tagsLoading) {
+    return (
+      <div className="p-6 w-full flex items-center justify-center">
+        <div className="animate-pulse text-center">
+          <p className="text-lg text-muted-foreground">Loading snippets...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 w-full">
@@ -217,15 +245,15 @@ const SnippetLibrary = ({ snippets }: SnippetLibraryProps) => {
               <div>
                 <h3 className="text-sm font-medium mb-2">Tags</h3>
                 <div className="flex flex-wrap gap-2">
-                  {availableTags.map((tag, index) => (
+                  {fetchedTags.map((tag, index) => (
                     <button
                       key={index}
-                      onClick={() => toggleTagFilter(tag)}
-                      className={selectedTags.includes(tag) ? 'opacity-100' : 'opacity-70 hover:opacity-100'}
+                      onClick={() => toggleTagFilter(tag.name)}
+                      className={selectedTags.includes(tag.name) ? 'opacity-100' : 'opacity-70 hover:opacity-100'}
                     >
                       <TagPill 
-                        name={tag} 
-                        type={selectedTags.includes(tag) ? 'user' : 'auto'} 
+                        name={tag.name} 
+                        type={tag.type} 
                       />
                     </button>
                   ))}
@@ -356,8 +384,8 @@ const SnippetLibrary = ({ snippets }: SnippetLibraryProps) => {
                       )}
                     </div>
                   </td>
-                  <td className="p-3">{snippet.usageCount} uses</td>
-                  <td className="p-3">{new Date(snippet.createdAt).toLocaleDateString()}</td>
+                  <td className="p-3">{snippet.usage_count} uses</td>
+                  <td className="p-3">{new Date(snippet.created_at).toLocaleDateString()}</td>
                   <td className="p-3">
                     <Button 
                       size="sm" 

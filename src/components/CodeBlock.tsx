@@ -12,40 +12,105 @@ type CodeBlockProps = {
   detectPatterns?: boolean;
 };
 
-// Enhanced syntax highlighting function
+// Enhanced syntax highlighting function with more detailed token handling
 const highlightCode = (code: string, language: string) => {
-  // This is a simplified version - in a real app we'd use a library like Prism or highlight.js
+  // Language specific highlighting rules
   if (language === 'javascript' || language === 'typescript') {
     return code
-      .replace(/(const|let|var|function|return|if|else|for|while|class|import|export|from|async|await)(\s|$)/g, '<span style="color: #C678DD;">$1</span>$2')
-      .replace(/(".*?"|'.*?'|`.*?`)/g, '<span style="color: #98C379;">$1</span>')
-      .replace(/(\b\d+\b)/g, '<span style="color: #D19A66;">$1</span>')
-      .replace(/(\{|\}|\(|\)|\[|\]|=>)/g, '<span style="color: #ABB2BF;">$1</span>')
-      .replace(/(\/\/.*)/g, '<span style="color: #5C6370;">$1</span>')
-      .replace(/(console\.log)/g, '<span style="color: #E06C75;">$1</span>')
-      .replace(/(\.map|\.filter|\.reduce|\.forEach)/g, '<span style="color: #61AFEF;">$1</span>')
+      // Keywords
+      .replace(/(const|let|var|function|return|if|else|for|while|class|import|export|from|async|await|try|catch|throw|finally)(\s|$)/g, '<span style="color: #C678DD;">$1</span>$2')
+      // Types (TypeScript)
+      .replace(/(string|number|boolean|any|void|interface|type|extends|implements|namespace)(\s|$)/g, '<span style="color: #E5C07B;">$1</span>$2')
+      // Strings
+      .replace(/("(?:\\"|[^"])*"|'(?:\\'|[^'])*'|`(?:\\`|[^`])*`)(?!\w)/g, '<span style="color: #98C379;">$1</span>')
+      // Numbers
+      .replace(/(?<![a-zA-Z0-9_])(\d+\.?\d*|\.\d+)(?![a-zA-Z0-9_])/g, '<span style="color: #D19A66;">$1</span>')
+      // Brackets and operators
+      .replace(/(\{|\}|\(|\)|\[|\]|=>|=|&amp;|&lt;|&gt;|\+|-|\*|\/|%|\||\^|!|\?|:|;|,|\.|==|===|!=|!==|>=|<=)/g, '<span style="color: #56B6C2;">$1</span>')
+      // Comments
+      .replace(/(\/\/.*|\/\*[\s\S]*?\*\/)/g, '<span style="color: #5C6370;">$1</span>')
+      // React hooks
+      .replace(/(use[A-Z]\w+)/g, '<span style="color: #61AFEF;">$1</span>')
+      // Array methods
+      .replace(/(\.map|\.filter|\.reduce|\.forEach|\.find|\.some|\.every|\.includes)/g, '<span style="color: #61AFEF;">$1</span>')
+      // DOM API
+      .replace(/(document|window|localStorage|sessionStorage|navigator|console)\./g, '<span style="color: #E06C75;">$1</span>')
+      // API Calls
       .replace(/(fetch|axios|XMLHttpRequest)/g, '<span style="color: #56B6C2;">$1</span>')
-      .replace(/(try|catch|throw|finally)/g, '<span style="color: #E5C07B;">$1</span>');
+      // Error handling
+      .replace(/(Error|TypeError|SyntaxError)/g, '<span style="color: #E06C75;">$1</span>')
+      // JSX Tags
+      .replace(/(&lt;\/?\w+)/g, '<span style="color: #E06C75;">$1</span>')
+      // Attributes in JSX
+      .replace(/(\s\w+)=(".*?")/g, '<span style="color: #D19A66;">$1</span>=<span style="color: #98C379;">$2</span>');
   } else if (language === 'python') {
     return code
-      .replace(/(def|class|if|else|elif|for|while|import|from|return|True|False|try|except|finally|with|as)(\s|$)/g, '<span style="color: #C678DD;">$1</span>$2')
-      .replace(/(".*?"|'.*?')/g, '<span style="color: #98C379;">$1</span>')
-      .replace(/(\b\d+\b)/g, '<span style="color: #D19A66;">$1</span>')
+      // Keywords
+      .replace(/(def|class|if|else|elif|for|while|import|from|return|try|except|finally|with|as|in|is|not|and|or|True|False|None)(\s|$|\:)/g, '<span style="color: #C678DD;">$1</span>$2')
+      // Strings
+      .replace(/("(?:\\"|[^"])*"|'(?:\\'|[^'])*'|"""[\s\S]*?"""|'''[\s\S]*?''')/g, '<span style="color: #98C379;">$1</span>')
+      // Numbers
+      .replace(/(?<![a-zA-Z0-9_])(\d+\.?\d*|\.\d+)(?![a-zA-Z0-9_])/g, '<span style="color: #D19A66;">$1</span>')
+      // Comments
       .replace(/(#.*)/g, '<span style="color: #5C6370;">$1</span>')
-      .replace(/(print)/g, '<span style="color: #E06C75;">$1</span>');
+      // Decorators
+      .replace(/(@\w+)/g, '<span style="color: #61AFEF;">$1</span>')
+      // Built-in functions
+      .replace(/(print|len|str|int|float|list|dict|tuple|set|sum|min|max|sorted|range|enumerate|zip|map|filter)(\s*\()/g, '<span style="color: #E06C75;">$1</span>$2')
+      // Self parameter
+      .replace(/(self)(\.|,|\))/g, '<span style="color: #E06C75;">$1</span>$2');
   } else if (language === 'css' || language === 'scss') {
     return code
-      .replace(/(@\w+)/g, '<span style="color: #C678DD;">$1</span>')
-      .replace(/(#[a-fA-F0-9]+)/g, '<span style="color: #D19A66;">$1</span>')
-      .replace(/(\d+px|\d+em|\d+rem|\d+%)/g, '<span style="color: #D19A66;">$1</span>')
-      .replace(/([\.\#]\w+)/g, '<span style="color: #61AFEF;">$1</span>');
+      // Properties
+      .replace(/([\w-]+)(\s*:)/g, '<span style="color: #E06C75;">$1</span>$2')
+      // Values
+      .replace(/(:)(\s*)([\w-]+|#[a-fA-F0-9]+)/g, '$1$2<span style="color: #98C379;">$3</span>')
+      // Units
+      .replace(/(\d+)(px|rem|em|vh|vw|%|s|ms)/g, '<span style="color: #D19A66;">$1$2</span>')
+      // Hex colors
+      .replace(/(#[a-fA-F0-9]{3,8})(?![a-zA-Z0-9])/g, '<span style="color: #56B6C2;">$1</span>')
+      // Media queries
+      .replace(/(@media|@keyframes|@import|@font-face|@supports)/g, '<span style="color: #C678DD;">$1</span>')
+      // Brackets and punctuation
+      .replace(/(\{|\}|;)/g, '<span style="color: #ABB2BF;">$1</span>')
+      // Selectors
+      .replace(/(\.[\w-]+|#[\w-]+)(\s|,|\{)/g, '<span style="color: #61AFEF;">$1</span>$2')
+      // Comments
+      .replace(/(\/\*[\s\S]*?\*\/)/g, '<span style="color: #5C6370;">$1</span>');
   } else if (language === 'html') {
     return code
-      .replace(/(&lt;\/?\w+)/g, '<span style="color: #E06C75;">$1</span>')
-      .replace(/(\w+=".*?")/g, '<span style="color: #D19A66;">$1</span>')
-      .replace(/(&gt;)/g, '<span style="color: #E06C75;">$1</span>');
+      // Tags
+      .replace(/(&lt;\/?)([\w-]+)/g, '<span style="color: #E06C75;">$1$2</span>')
+      // Attributes
+      .replace(/(\s)([\w-]+)(=)(".*?"|'.*?')/g, '$1<span style="color: #D19A66;">$2</span>$3<span style="color: #98C379;">$4</span>')
+      // Angle brackets and comments
+      .replace(/(&lt;|&gt;)(?!\w)/g, '<span style="color: #56B6C2;">$1</span>')
+      // Comments
+      .replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span style="color: #5C6370;">$1</span>');
+  } else if (language === 'sql') {
+    return code
+      // Keywords
+      .replace(/(SELECT|FROM|WHERE|JOIN|LEFT|RIGHT|INNER|OUTER|ON|AS|GROUP BY|ORDER BY|HAVING|LIMIT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP|TABLE|VIEW|INDEX|TRIGGER|PROCEDURE|FUNCTION|CONSTRAINT|PRIMARY KEY|FOREIGN KEY)(\s|$)/gi, 
+        '<span style="color: #C678DD;">$1</span>$2')
+      // Strings
+      .replace(/('(?:\\'|[^'])*')/g, '<span style="color: #98C379;">$1</span>')
+      // Numbers
+      .replace(/(?<![a-zA-Z0-9_])(\d+\.?\d*|\.\d+)(?![a-zA-Z0-9_])/g, '<span style="color: #D19A66;">$1</span>')
+      // Operators
+      .replace(/(=|&lt;|&gt;|&lt;=|&gt;=|!=|IS NULL|IS NOT NULL|IN|LIKE|BETWEEN|AND|OR|NOT)/gi, '<span style="color: #56B6C2;">$1</span>')
+      // Comments
+      .replace(/(--.*|\/\*[\s\S]*?\*\/)/g, '<span style="color: #5C6370;">$1</span>');
   } else {
-    return code;
+    // Generic syntax highlighting for unsupported languages
+    return code
+      // Keywords (common across languages)
+      .replace(/(if|else|for|while|function|return|class|public|private|protected|static|final|void|int|string|bool|true|false|null)(\s|$)/g, '<span style="color: #C678DD;">$1</span>$2')
+      // Strings
+      .replace(/("(?:\\"|[^"])*"|'(?:\\'|[^'])*')/g, '<span style="color: #98C379;">$1</span>')
+      // Comments
+      .replace(/(\/\/.*|\/\*[\s\S]*?\*\/|#.*)/g, '<span style="color: #5C6370;">$1</span>')
+      // Numbers
+      .replace(/(?<![a-zA-Z0-9_])(\d+\.?\d*|\.\d+)(?![a-zA-Z0-9_])/g, '<span style="color: #D19A66;">$1</span>');
   }
 };
 
@@ -66,20 +131,24 @@ const detectAndHighlightPatterns = (code: string): string => {
     '<span class="pattern-highlight pattern-highlight-loop">$1</span>');
   
   // API call detection
-  highlightedCode = highlightedCode.replace(/(fetch\s*\(|axios\.|XMLHttpRequest)/g, 
+  highlightedCode = highlightedCode.replace(/(fetch\s*\(|axios\.|XMLHttpRequest|\.get\(|\.post\(|request\s*\()/g, 
     '<span class="pattern-highlight pattern-highlight-api">$1</span>');
   
   // Error handling detection
-  highlightedCode = highlightedCode.replace(/(try\s*{|catch\s*\([^)]*\)|throw\s+new\s+Error)/g, 
+  highlightedCode = highlightedCode.replace(/(try\s*{|catch\s*\([^)]*\)|throw\s+new\s+Error|throw\s+|finally\s*{|except\s+|raise\s+)/g, 
     '<span class="pattern-highlight pattern-highlight-error">$1</span>');
   
   // Debugging detection
-  highlightedCode = highlightedCode.replace(/(console\.log|console\.error|console\.debug|debugger)/g, 
+  highlightedCode = highlightedCode.replace(/(console\.log|console\.error|console\.debug|debugger|print\s*\()/g, 
     '<span class="pattern-highlight pattern-highlight-debug">$1</span>');
   
   // Array methods detection
-  highlightedCode = highlightedCode.replace(/(\.\s*map\s*\(|\.\s*filter\s*\(|\.\s*reduce\s*\(|\.\s*forEach\s*\()/g, 
+  highlightedCode = highlightedCode.replace(/(\.\s*map\s*\(|\.\s*filter\s*\(|\.\s*reduce\s*\(|\.\s*forEach\s*\(|\.\s*find\s*\()/g, 
     '<span class="pattern-highlight pattern-highlight-array">$1</span>');
+  
+  // React hooks detection
+  highlightedCode = highlightedCode.replace(/(use[A-Z][a-zA-Z]*\s*\()/g, 
+    '<span class="pattern-highlight pattern-highlight-hook">$1</span>');
   
   return highlightedCode;
 };
@@ -164,7 +233,7 @@ const CodeBlock = ({
           {copied ? <Check className="w-4 h-4 animate-copy-success" /> : <Copy className="w-4 h-4" />}
         </button>
       )}
-      <pre className={`overflow-x-auto ${showLineNumbers && !preview ? 'line-numbered' : ''}`}>
+      <pre className={`overflow-x-auto code-scrollbar ${showLineNumbers && !preview ? 'line-numbered' : ''}`}>
         <code className="font-jetbrains text-sm transition-opacity duration-300" 
               dangerouslySetInnerHTML={{ __html: highlightedCode || displayCode }} />
       </pre>

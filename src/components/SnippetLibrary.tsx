@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import SnippetCard from './SnippetCard';
 import { Snippet } from '../types/Snippet';
@@ -15,12 +14,13 @@ import { useQuery } from '@tanstack/react-query';
 
 type SnippetLibraryProps = {
   snippets?: Snippet[];
+  onEditSnippet?: (snippet: Snippet) => void;
 };
 
 type ViewMode = 'grid' | 'list' | 'table';
 type SortOption = 'recent' | 'usage' | 'alphabetical' | 'language';
 
-const SnippetLibrary = ({ snippets: propSnippets }: SnippetLibraryProps) => {
+const SnippetLibrary = ({ snippets: propSnippets, onEditSnippet }: SnippetLibraryProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedSnippet, setSelectedSnippet] = useState<Snippet | undefined>(undefined);
   const [filteredSnippets, setFilteredSnippets] = useState<Snippet[]>([]);
@@ -55,8 +55,12 @@ const SnippetLibrary = ({ snippets: propSnippets }: SnippetLibraryProps) => {
   const handleSnippetClick = (id: string) => {
     const snippet = snippetsData.find(s => s.id === id);
     if (snippet) {
-      setSelectedSnippet(snippet);
-      setDialogOpen(true);
+      if (onEditSnippet) {
+        onEditSnippet(snippet);
+      } else {
+        setSelectedSnippet(snippet);
+        setDialogOpen(true);
+      }
     }
   };
 

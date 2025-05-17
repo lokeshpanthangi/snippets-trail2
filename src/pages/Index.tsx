@@ -10,9 +10,11 @@ import { getSnippets } from '../services/snippetService';
 import { getTags, getLanguageCounts } from '../services/tagService';
 import { getFolders } from '../services/folderService';
 import type { Folder } from '@/types/Folder';
+import type { Snippet } from '@/types/Snippet';
 
 const Index = () => {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [selectedSnippet, setSelectedSnippet] = useState<Snippet | undefined>(undefined);
   
   // Fetch snippets
   const { data: snippets = [], isLoading: snippetsLoading } = useQuery({
@@ -39,6 +41,12 @@ const Index = () => {
   });
   
   const handleCreateSnippet = () => {
+    setSelectedSnippet(undefined);
+    setCreateDialogOpen(true);
+  };
+  
+  const handleEditSnippet = (snippet: Snippet) => {
+    setSelectedSnippet(snippet);
     setCreateDialogOpen(true);
   };
   
@@ -63,7 +71,10 @@ const Index = () => {
               <div className="animate-pulse text-primary">Loading snippets...</div>
             </div>
           ) : snippets.length > 0 ? (
-            <SnippetLibrary snippets={snippets} />
+            <SnippetLibrary 
+              snippets={snippets} 
+              onEditSnippet={handleEditSnippet}
+            />
           ) : (
             <EmptyState onCreateSnippet={handleCreateSnippet} />
           )}
@@ -73,6 +84,7 @@ const Index = () => {
       <SnippetDialog
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}
+        snippet={selectedSnippet}
       />
     </div>
   );

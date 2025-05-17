@@ -1,78 +1,83 @@
 
 import React from 'react';
 
-type LanguageProps = {
+type LanguageBadgeProps = {
   language: string;
 };
 
-const languageColors: Record<string, string> = {
-  javascript: 'bg-yellow-400 text-black',
-  python: 'bg-blue-600 text-white',
-  typescript: 'bg-blue-500 text-white',
-  html: 'bg-orange-500 text-white',
-  css: 'bg-blue-400 text-white',
-  ruby: 'bg-red-600 text-white',
-  go: 'bg-blue-300 text-white',
-  java: 'bg-red-400 text-white',
-  csharp: 'bg-green-600 text-white',
-  php: 'bg-indigo-500 text-white',
-  swift: 'bg-orange-600 text-white',
-  rust: 'bg-orange-700 text-white',
-  c: 'bg-gray-700 text-white',
-  cpp: 'bg-blue-800 text-white',
-  dart: 'bg-blue-500 text-white',
-  kotlin: 'bg-purple-600 text-white',
-  scala: 'bg-red-700 text-white',
-  haskell: 'bg-gray-600 text-white',
-  shell: 'bg-gray-800 text-green-300',
-  bash: 'bg-gray-800 text-green-300',
-  powershell: 'bg-blue-900 text-blue-200',
-  sql: 'bg-orange-700 text-white',
-  markdown: 'bg-gray-700 text-white',
-  json: 'bg-gray-600 text-yellow-300',
-  xml: 'bg-gray-700 text-orange-300',
-  yaml: 'bg-purple-800 text-white',
-  default: 'bg-muted text-muted-foreground',
+const getLangColor = (lang: string): string => {
+  const langLower = lang.toLowerCase();
+  
+  switch(langLower) {
+    case 'javascript':
+      return 'bg-lang-js text-gray-900';
+    case 'typescript':
+      return 'bg-lang-ts text-white';
+    case 'python':
+      return 'bg-lang-py text-white';
+    case 'html':
+      return 'bg-lang-html text-white';
+    case 'css':
+      return 'bg-lang-css text-white';
+    case 'ruby':
+      return 'bg-lang-ruby text-white';
+    case 'go':
+      return 'bg-lang-go text-white';
+    case 'java':
+      return 'bg-lang-java text-white';
+    case 'c#':
+      return 'bg-lang-csharp text-white';
+    case 'php':
+      return 'bg-lang-php text-white';
+    case 'swift':
+      return 'bg-lang-swift text-white';
+    case 'rust':
+      return 'bg-lang-rust text-white';
+    default:
+      return 'bg-gray-700 text-white';
+  }
 };
 
-const languageDisplay: Record<string, string> = {
-  javascript: 'JS',
-  typescript: 'TS',
-  python: 'PY',
-  html: 'HTML',
-  css: 'CSS',
-  ruby: 'RUBY',
-  go: 'GO',
-  java: 'JAVA',
-  csharp: 'C#',
-  php: 'PHP',
-  swift: 'SWIFT',
-  rust: 'RUST',
-  c: 'C',
-  cpp: 'C++',
-  dart: 'DART',
-  kotlin: 'KT',
-  scala: 'SCALA',
-  haskell: 'HS',
-  shell: 'SH',
-  bash: 'BASH',
-  powershell: 'PS',
-  sql: 'SQL',
-  markdown: 'MD',
-  json: 'JSON',
-  xml: 'XML',
-  yaml: 'YAML',
+const getLangIcon = (lang: string): string => {
+  const langLower = lang.toLowerCase();
+  
+  switch(langLower) {
+    case 'javascript':
+      return 'JS';
+    case 'typescript':
+      return 'TS';
+    case 'python':
+      return 'PY';
+    case 'html':
+      return 'HTML';
+    case 'css':
+      return 'CSS';
+    case 'ruby':
+      return 'RB';
+    case 'go':
+      return 'GO';
+    case 'java':
+      return 'JAVA';
+    case 'c#':
+      return 'C#';
+    case 'php':
+      return 'PHP';
+    case 'swift':
+      return 'SWIFT';
+    case 'rust':
+      return 'RUST';
+    default:
+      return lang.substring(0, 2).toUpperCase();
+  }
 };
 
-const LanguageBadge = ({ language }: LanguageProps) => {
-  const normalizedLang = language.toLowerCase();
-  const colorClass = languageColors[normalizedLang] || languageColors.default;
-  const displayText = languageDisplay[normalizedLang] || language.toUpperCase();
-
+const LanguageBadge = ({ language }: LanguageBadgeProps) => {
+  const colorClass = getLangColor(language);
+  const languageIcon = getLangIcon(language);
+  
   return (
-    <span className={`language-badge ${colorClass} flex items-center gap-1.5 shadow-sm`}>
-      <span className="w-2 h-2 rounded-full bg-white/40"></span>
-      {displayText}
+    <span className={`language-badge ${colorClass} transition-all duration-200 hover:scale-105`}>
+      {languageIcon}
     </span>
   );
 };

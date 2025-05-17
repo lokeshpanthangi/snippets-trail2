@@ -59,11 +59,20 @@
   code, pre {
     @apply font-jetbrains;
   }
+  
+  /* Add reduced motion option for accessibility */
+  @media (prefers-reduced-motion) {
+    * {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+    }
+  }
 }
 
 @layer components {
   .snippet-card {
-    @apply bg-snippet-bg border border-snippet-border rounded-md overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-neon-purple;
+    @apply bg-snippet-bg border border-snippet-border rounded-md overflow-hidden transition-all duration-300;
   }
 
   .code-editor {
@@ -87,7 +96,7 @@
   }
 
   .copy-button {
-    @apply p-1.5 rounded-md bg-muted/50 hover:bg-primary/20 transition-colors absolute top-3 right-3 opacity-0 group-hover:opacity-100;
+    @apply p-1.5 rounded-md bg-muted/50 hover:bg-primary/20 transition-all absolute top-3 right-3;
   }
 
   .grid-bg {
@@ -98,7 +107,7 @@
     @apply overflow-hidden whitespace-nowrap border-r-4 border-primary inline-block animate-typing animate-blink-caret;
   }
   
-  /* New styles for enhanced features */
+  /* Enhanced style components */
   .line-numbered {
     @apply relative pl-8;
     counter-reset: line;
@@ -109,27 +118,55 @@
   }
   
   .pattern-highlight {
-    @apply bg-primary/10 rounded;
+    @apply rounded px-0.5 transition-colors duration-300;
   }
   
   .pattern-highlight-loop {
-    @apply bg-purple-500/10;
+    @apply bg-purple-500/10 hover:bg-purple-500/20;
   }
   
   .pattern-highlight-api {
-    @apply bg-blue-500/10;
+    @apply bg-blue-500/10 hover:bg-blue-500/20;
   }
   
   .pattern-highlight-debug {
-    @apply bg-yellow-500/10;
+    @apply bg-yellow-500/10 hover:bg-yellow-500/20;
   }
   
   .pattern-highlight-error {
-    @apply bg-red-500/10;
+    @apply bg-red-500/10 hover:bg-red-500/20;
   }
   
   .pattern-highlight-array {
-    @apply bg-green-500/10;
+    @apply bg-green-500/10 hover:bg-green-500/20;
+  }
+  
+  /* Card states */
+  .card-hover {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-neon-purple;
+  }
+  
+  /* Animation utilities */
+  .hover-scale {
+    @apply transition-transform duration-200 hover:scale-105;
+  }
+  
+  .pulse {
+    @apply animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite];
+  }
+  
+  /* Scrollbar styling */
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Tag connection animation */
+  .tag-connection {
+    @apply absolute w-[1px] bg-primary/50 animate-tag-connect;
   }
 }
-

@@ -8,6 +8,8 @@ type CodeBlockProps = {
   language: string;
   preview?: boolean;
   showLineNumbers?: boolean;
+  highlightLines?: number[];
+  detectPatterns?: boolean;
 };
 
 // Enhanced syntax highlighting function
@@ -54,22 +56,74 @@ const addLineNumbers = (code: string): string => {
   }).join('\n');
 };
 
-const CodeBlock = ({ code, language, preview = false, showLineNumbers = true }: CodeBlockProps) => {
+// Function to detect and highlight patterns in code
+const detectAndHighlightPatterns = (code: string): string => {
+  // Detect and wrap patterns in highlighting spans
+  let highlightedCode = code;
+  
+  // Loop detection
+  highlightedCode = highlightedCode.replace(/(for\s*\([^)]*\)|while\s*\([^)]*\))/g, 
+    '<span class="pattern-highlight pattern-highlight-loop">$1</span>');
+  
+  // API call detection
+  highlightedCode = highlightedCode.replace(/(fetch\s*\(|axios\.|XMLHttpRequest)/g, 
+    '<span class="pattern-highlight pattern-highlight-api">$1</span>');
+  
+  // Error handling detection
+  highlightedCode = highlightedCode.replace(/(try\s*{|catch\s*\([^)]*\)|throw\s+new\s+Error)/g, 
+    '<span class="pattern-highlight pattern-highlight-error">$1</span>');
+  
+  // Debugging detection
+  highlightedCode = highlightedCode.replace(/(console\.log|console\.error|console\.debug|debugger)/g, 
+    '<span class="pattern-highlight pattern-highlight-debug">$1</span>');
+  
+  // Array methods detection
+  highlightedCode = highlightedCode.replace(/(\.\s*map\s*\(|\.\s*filter\s*\(|\.\s*reduce\s*\(|\.\s*forEach\s*\()/g, 
+    '<span class="pattern-highlight pattern-highlight-array">$1</span>');
+  
+  return highlightedCode;
+};
+
+const CodeBlock = ({ 
+  code, 
+  language, 
+  preview = false, 
+  showLineNumbers = true,
+  highlightLines = [],
+  detectPatterns = false
+}: CodeBlockProps) => {
   const [copied, setCopied] = useState(false);
   const [highlightedCode, setHighlightedCode] = useState('');
+  const [isHovering, setIsHovering] = useState(false);
   
   useEffect(() => {
     // Apply syntax highlighting with a slight delay for animation
     const timer = setTimeout(() => {
       let processedCode = highlightCode(code, language);
+      
+      if (detectPatterns) {
+        processedCode = detectAndHighlightPatterns(processedCode);
+      }
+      
       if (showLineNumbers && !preview) {
         processedCode = addLineNumbers(processedCode);
       }
+      
+      // Highlight specific lines if needed
+      if (highlightLines.length > 0 && !preview) {
+        const lines = processedCode.split('\n');
+        processedCode = lines.map((line, i) => {
+          return highlightLines.includes(i + 1) 
+            ? `<div class="bg-primary/10 -mx-4 px-4">${line}</div>`
+            : line;
+        }).join('\n');
+      }
+      
       setHighlightedCode(processedCode);
     }, 300);
     
     return () => clearTimeout(timer);
-  }, [code, language, preview, showLineNumbers]);
+  }, [code, language, preview, showLineNumbers, highlightLines, detectPatterns]);
   
   const copyToClipboard = () => {
     navigator.clipboard.writeText(code)
@@ -95,18 +149,24 @@ const CodeBlock = ({ code, language, preview = false, showLineNumbers = true }: 
   const displayCode = preview ? code.split('\n').slice(0, 3).join('\n') : code;
   
   return (
-    <div className={`code-editor group relative animate-fade-in ${preview ? '' : 'p-0'}`}>
+    <div 
+      className={`code-editor group relative animate-fade-in ${preview ? '' : 'p-0'}`}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+    >
       {!preview && (
         <button 
           onClick={copyToClipboard} 
-          className={`copy-button ${copied ? 'bg-secondary/30 text-secondary-foreground' : ''} ${copied ? 'animate-copy-success' : ''}`}
+          className={`copy-button ${copied ? 'bg-secondary/30 text-secondary-foreground' : ''} 
+                     transition-all duration-200 ${isHovering ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
           aria-label="Copy code"
         >
-          {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+          {copied ? <Check className="w-4 h-4 animate-copy-success" /> : <Copy className="w-4 h-4" />}
         </button>
       )}
       <pre className={`overflow-x-auto ${showLineNumbers && !preview ? 'line-numbered' : ''}`}>
-        <code className="font-jetbrains text-sm" dangerouslySetInnerHTML={{ __html: highlightedCode || displayCode }} />
+        <code className="font-jetbrains text-sm transition-opacity duration-300" 
+              dangerouslySetInnerHTML={{ __html: highlightedCode || displayCode }} />
       </pre>
     </div>
   );
